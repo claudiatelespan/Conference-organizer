@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import "../App.css";
 
-const Sidebar = ({ conferences, onAddConference, userRole }) => {
+const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,reviewerId,
+  registeredConferences, onRegister
+  }) => {
     const mockReviewers = [
       { id: 1, name: "Reviewer 1" },
       { id: 2, name: "Reviewer 2" },
@@ -61,7 +63,7 @@ const Sidebar = ({ conferences, onAddConference, userRole }) => {
   
       // Notifică componenta părinte despre conferința nouă
       onAddConference({
-        id: conferences.length + 1,
+        id: conferences? conferences.length + 1 : 0,
         title: newConference.title,
         description: newConference.description,
         date: newConference.date,
@@ -72,17 +74,16 @@ const Sidebar = ({ conferences, onAddConference, userRole }) => {
       setNewConference({ title: "", description: "", date: "", reviewers: [] });
       setShowForm(false);
     };
-  
-    return (
-      <div className="sidebar">
-        {userRole === "organizer" && (
-          <button className="add-button" onClick={() => setShowForm(true)}>
-            +
-          </button>
-        )}
-        <div className="conference-list">
-          {conferences.map((conf) => (
-            <div key={conf.id} className="conference-item">
+
+    const renderConferences = () => {
+        if (userRole === "organizer") {
+          return conferences?.map((conf) => (
+            <div 
+              key={conf.id} 
+              className="conference-item"
+              onClick={() => onSelectConference(conf.id)}
+              style={{ cursor: 'pointer' }}
+            >
               <strong>{conf.title}</strong>
               <p>{conf.date}</p>
               <p>
@@ -90,10 +91,67 @@ const Sidebar = ({ conferences, onAddConference, userRole }) => {
                 {conf.reviewers.map((rev) => rev.name).join(", ")}
               </p>
             </div>
-          ))}
+          ));
+        }
+    
+        if (userRole === "reviewer") {
+          const assignedConferences = conferences?.filter((conf) =>
+            conf.reviewers.some((rev) => rev.id === reviewerId)
+          );
+        
+          return assignedConferences?.map((conf) => (
+            <div 
+              key={conf.id} 
+              className="conference-item"
+              onClick={() => onSelectConference(conf.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <strong>{conf.title}</strong>
+              <p>{conf.date}</p>
+            </div>
+          ));
+        }
+    
+        if (userRole === "author") {
+          return conferences?.map((conf) => (
+            <div key={conf.id} className="conference-item">
+              <strong>{conf.title}</strong>
+              <p>{conf.description}</p>
+              <p>{conf.date}</p>
+              {registeredConferences.includes(conf.id) ? (
+                <button 
+                  onClick={() => onSelectConference(conf.id)}
+                  className="select-button"
+                >
+                  Vizualizează
+                </button>
+              ) : (
+                <button 
+                  onClick={() => onRegister(conf.id)}
+                  className="register-button"
+                >
+                  Înscrie-te
+                </button>
+              )}
+            </div>
+          ));
+        }
+      };
+    
+  
+    return (
+      <div className="sidebar">
+        <h1>Conferințe</h1>
+        {userRole === "organizer" && (
+          <button className="add-button" onClick={() => setShowForm(true)}>
+            +
+          </button>
+        )}
+        <div className="conference-list">
+        {renderConferences()}
         </div>
   
-        {showForm && (
+        {showForm && userRole === "organizer" && (
           <div className="modal">
             <div className="modal-content">
               <h3>Adaugă Conferință</h3>
