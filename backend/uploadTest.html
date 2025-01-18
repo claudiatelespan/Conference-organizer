@@ -1,0 +1,35 @@
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="Titlul articolului" />
+    <input type="hidden" name="conferenceId" value="3" />
+    <input type="hidden" name="userId" value="6" />  <!-- adăugăm authorId -->
+    <input type="file" name="file" />
+    <button type="submit">Încarcă</button>
+  </form>
+  
+  <script>
+    const form = document.getElementById('uploadForm');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+  
+      const formData = new FormData(form);
+  
+      try {
+        const response = await fetch('http://localhost:1234/api/articles/upload', {
+          method: 'POST',
+          body: formData,
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          alert('Articol încărcat cu succes!');
+        } else {
+          const error = await response.json();
+          alert(`Eroare: ${error.message}`);
+        }
+      } catch (err) {
+        console.error('Eroare la încărcare:', err);
+        alert('Eroare internă de server.');
+      }
+    };
+  </script>
+  
