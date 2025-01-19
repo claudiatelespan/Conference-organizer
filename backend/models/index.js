@@ -89,6 +89,17 @@ conferenceReviewers.belongsTo(user, {
     as: 'reviewer', 
 });
 
+articleReviewer.belongsTo(user, {
+    foreignKey: 'reviewer_id',
+    as: 'reviewer',
+});
+
+articleReviewer.belongsTo(article, {
+    foreignKey: 'article_id',
+    as: 'article',
+});
+
+
 module.exports = {
     connection: db,
     user,

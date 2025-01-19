@@ -2,6 +2,7 @@ const { article: ArticleModel, conferenceAuthor: ConferenceAuthorModel } = requi
 const { articleReviewer: ArticleReviewModel } = require('../models');
 const { conference: ConferenceModel } = require('../models');
 const ConferenceReviewerModel = require('../models/index').conferenceReviewers
+const userModel = require('../models/index').user;
 const path = require('path'); 
 const fs = require('fs'); 
 
@@ -249,10 +250,63 @@ const downloadFile = async (req, res) => {
   }
 };
 
+const getArticleDetails = async (req, res) => {
+  try {
+    const { articleId } = req.params;
+
+    const article = await ArticleModel.findByPk(articleId, {
+      attributes: ['id', 'title', 'status', 'filePath', 'conferenceId', 'authorId'],
+    });
+
+    if (!article) {
+      return res.status(404).send({ message: 'Articolul nu a fost găsit.' });
+    }
+
+    const reviews = await ArticleReviewModel.findAll({
+      where: { article_id: articleId },
+      include: [
+        {
+          model: userModel,
+          as: 'reviewer', 
+          attributes: ['id', 'email', 'role'], 
+        },
+      ],
+    });
+
+   
+    const formattedReviews = reviews.map((review) => ({
+      reviewer: {
+        id: review.reviewer.id,
+        email: review.reviewer.email,
+        role: review.reviewer.role,
+      },
+      status: review.status,
+      feedback: review.feedback,
+    }));
+
+    res.status(200).send({
+      message: 'Detalii despre articol.',
+      article: {
+        id: article.id,
+        title: article.title,
+        status: article.status,
+        filePath: article.filePath,
+        conferenceId: article.conferenceId,
+        authorId: article.authorId,
+      },
+      reviews: formattedReviews,
+    });
+  } catch (error) {
+    console.error('Eroare la obținerea detaliilor articolului:', error);
+    res.status(500).send({ message: 'Eroare internă de server.' });
+  }
+};
+
 module.exports = {
   uploadArticle,
   getArticlesByConference,
   reviewArticle,
   updateArticle,
-  downloadFile
+  downloadFile,
+  getArticleDetails
 };
