@@ -56,8 +56,8 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
     const handleFormSubmit = (e) => {
       e.preventDefault();
   
-      if (newConference.reviewers.length === 0) {
-        setError("Trebuie să adaugi cel puțin un reviewer!");
+      if (newConference.reviewers.length !== 2 ) {
+        setError("Trebuie să adaugi exact 2 revieweri!");
         return;
       }
   

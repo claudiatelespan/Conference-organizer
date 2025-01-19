@@ -30,21 +30,27 @@ const App = () => {
   const [articles, setArticles] = useState([
     {
       id: 1,
-      title: "Article 1",
-      author: "Author 1",
-      feedback: "Needs more citations",
+      title: "Articol despre React",
+      author: "Autor 1",
       status: "pending",
-      reviewerId: 101,
       conferenceId: 1,
+      fileUrl: "/files/articol_react.pdf",
+      reviews: [
+        { reviewerId: 1, feedback: "Foarte bine", approved: false },
+        { reviewerId: 2, feedback: "Necesită îmbunătățiri", approved: false },
+      ],
     },
     {
       id: 2,
-      title: "Article 2",
-      author: "Author 2",
-      feedback: "",
-      status: "pending",
-      reviewerId: 102,
-      conferenceId: 1,
+      title: "Articol despre Inteligență Artificială",
+      author: "Autor 2",
+      status: "accepted",
+      conferenceId: 2,
+      fileUrl: "/files/articol_ai.pdf",
+      reviews: [
+        { reviewerId: 1, feedback: "Excelent!", approved: true },
+        { reviewerId: 2, feedback: "Aprobat!", approved: true },
+      ],
     },
   ]);
 
@@ -119,7 +125,10 @@ const App = () => {
       />
       <div className="main-content">
         {userRole === "organizer" && selectedConference && (
-          <OrganizerView conference={selectedConference} />
+          <OrganizerView 
+          conference={selectedConference}
+          articles={articles}
+           />
         )}
         {userRole === "author" && (
           <AuthorView
