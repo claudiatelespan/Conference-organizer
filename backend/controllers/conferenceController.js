@@ -2,6 +2,7 @@ const conferenceModel = require('../models').conference;
 const userModel = require('../models').user;
 const conferenceReviewersModel = require('../models').conferenceReviewers;
 
+
 const createConference = async (req, res) => {
     try {
      
@@ -177,7 +178,40 @@ const getConferencesByReviewer = async (req, res) => {
   }
 };
 
-
+const getReviewersByConferenceId = async (req, res) => {
+    try {
+      const { conferenceId } = req.params;
+  
+  
+      const conference = await conferenceModel.findByPk(conferenceId);
+      if (!conference) {
+        return res.status(404).send({ message: 'Conferința nu a fost găsită.' });
+      }
+  
+      
+      const reviewers = await conferenceReviewersModel.findAll({
+        where: { conferenceId },
+        include: [
+          {
+            model: userModel,
+            as: 'reviewer', 
+            attributes: ['id', 'email', 'role'],
+          },
+        ],
+      });
+  
+     
+      const formattedReviewers = reviewers.map((reviewer) => reviewer.reviewer);
+  
+      res.status(200).send({
+        message: `Revieweri pentru conferința ${conference.title}`,
+        reviewers: formattedReviewers,
+      });
+    } catch (error) {
+      console.error('Eroare la obținerea reviewerilor:', error);
+      res.status(500).send({ message: 'Eroare internă de server.' });
+    }
+  };
 
 module.exports = {
     createConference,
@@ -186,5 +220,5 @@ module.exports = {
     updateConference,
     deleteConferenceById,
     getConferencesByReviewer,
-
+    getReviewersByConferenceId
 }

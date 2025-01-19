@@ -223,9 +223,36 @@ const updateArticle = async (req, res) => {
   }
 };
 
+const downloadFile = async (req, res) => {
+  try {
+    const { articleId } = req.params; 
+
+  
+    const article = await ArticleModel.findByPk(articleId);
+
+    if (!article) {
+      return res.status(404).send({ message: 'Articolul nu a fost găsit.' });
+    }
+
+    const filePath = path.resolve(article.filePath);
+
+
+    return res.download(filePath, (err) => {
+      if (err) {
+        console.error('Eroare la descărcarea fișierului:', err);
+        return res.status(500).send({ message: 'Eroare la descărcarea fișierului.' });
+      }
+    });
+  } catch (error) {
+    console.error('Eroare la descărcarea fișierului:', error);
+    return res.status(500).send({ message: 'Eroare internă de server.' });
+  }
+};
+
 module.exports = {
   uploadArticle,
   getArticlesByConference,
   reviewArticle,
-  updateArticle
+  updateArticle,
+  downloadFile
 };
