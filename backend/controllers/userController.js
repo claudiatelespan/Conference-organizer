@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const dotenv = require('dotenv');
 
+// get toate articolele pe conferinte 
+// revieweri sa vada conferintele la care e alocat 
 
 dotenv.config();
 
