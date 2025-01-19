@@ -1,42 +1,74 @@
 import './App.css';
 import LoginView from './components/LoginView';
 import Sidebar from './components/Sidebar.js';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OrganizerView from "./components/OrganizerView.js";
 import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
+import { fetchConferences, loginUser } from "./Api.js";
+
 
 const App = () => {
-  const userRole = "reviewer";
+  const userRole = "author";
   const reviewerId = 1;
   const authorId = 1;
 
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const hardcodedUser = {
-    email: "reviewer1@example.com",  // Changed from username
-    password: "password123",
-    role: "reviewer",
-    id: 1
-  };
+  // const hardcodedUser = {
+  //   email: "reviewer1@example.com",  
+  //   password: "password123",
+  //   role: "reviewer",
+  //   id: 1
+  // };
 
+  // const hardcodedUser2 = {
+  //   email: "author1@example.com",  
+  //   password: "password123",
+  //   role: "author",
+  //   id: 1
+  // };
 
-  const [conferences, setConferences] = useState([
-    {
-      id: 1,
-      title: "Conferința Internațională de Tehnologie",
-      description: "Detalii despre conferința 1",
-      date: "2025-01-20",
-      reviewers: [{ id: 1, name: "Reviewer 1" }, { id: 2, name: "Reviewer 2" }],
-    },
-    {
-      id: 2,
-      title: "Conferința de Inteligență Artificială",
-      description: "Detalii despre conferința 2",
-      date: "2025-03-15",
-      reviewers: [{ id: 3, name: "Reviewer 3" }],
-    }
-  ]);
+  // const hardcodedUser3 = {
+  //   email: "organizer1@example.com",  
+  //   password: "password123",
+  //   role: "organizer",
+  //   id: 1
+  // };
+
+  const [conferences, setConferences] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadConferences = async () => {
+      try {
+        const data = await fetchConferences();
+        setConferences(data); // Actualizează lista de conferințe
+      } catch (error) {
+        setError("Failed to load conferences. Please try again later.");
+      }
+    };
+
+    if (isAuthenticated)
+      loadConferences();
+  }, [isAuthenticated]);
+  // const [conferences, setConferences] = useState([
+  //   {
+  //     id: 1,
+  //     title: "Conferința Internațională de Tehnologie",
+  //     description: "Detalii despre conferința 1",
+  //     date: "2025-01-20",
+  //     reviewers: [{ id: 1, name: "Reviewer 1" }, { id: 2, name: "Reviewer 2" }],
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Conferința de Inteligență Artificială",
+  //     description: "Detalii despre conferința 2",
+  //     date: "2025-03-15",
+  //     reviewers: [{ id: 3, name: "Reviewer 3" }],
+  //   }
+  // ]);
 
   const [articles, setArticles] = useState([
     {
@@ -134,13 +166,22 @@ const App = () => {
     }
   };
 
-  const handleLogin = (credentials) => {
-    if (credentials.username === hardcodedUser.username && 
-        credentials.password === hardcodedUser.password) {
+  const handleLogin = async (credentials) => {
+    try {
+      const data = await loginUser(credentials);
+      const { token, user } = data.data;
+      console.log(token);
+  
+      // Stochează token-ul în localStorage pentru autentificare ulterioară
+      localStorage.setItem("authToken", token);
+  
+      // Actualizează starea
       setIsAuthenticated(true);
-      setCurrentUser(hardcodedUser);
-    } else {
-      alert("Credențiale invalide!");
+      setCurrentUser(user);
+  
+      alert(`Autentificat cu succes ca ${user.role}`);
+    } catch (error) {
+      alert(error.message);
     }
   };
 
