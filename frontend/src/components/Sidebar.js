@@ -18,6 +18,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
       reviewers: [],
     });
   
+    const [viewMode, setViewMode] = useState('all'); // 'all' or 'registered'
     const [selectedReviewer, setSelectedReviewer] = useState("");
     const [error, setError] = useState("");
   
@@ -56,8 +57,8 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
     const handleFormSubmit = (e) => {
       e.preventDefault();
   
-      if (newConference.reviewers.length === 0) {
-        setError("Trebuie să adaugi cel puțin un reviewer!");
+      if (newConference.reviewers.length !== 2 ) {
+        setError("Trebuie să adaugi exact 2 revieweri!");
         return;
       }
   
@@ -76,67 +77,73 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
     };
 
     const renderConferences = () => {
-        if (userRole === "organizer") {
-          return conferences?.map((conf) => (
-            <div 
-              key={conf.id} 
-              className="conference-item"
-              onClick={() => onSelectConference(conf.id)}
-              style={{ cursor: 'pointer' }}
-            >
-              <strong>{conf.title}</strong>
-              <p>{conf.date}</p>
-              <p>
-                <strong>Revieweri:</strong>{" "}
-                {conf.reviewers.map((rev) => rev.name).join(", ")}
-              </p>
-            </div>
-          ));
-        }
-    
-        if (userRole === "reviewer") {
-          const assignedConferences = conferences?.filter((conf) =>
-            conf.reviewers.some((rev) => rev.id === reviewerId)
-          );
-        
-          return assignedConferences?.map((conf) => (
-            <div 
-              key={conf.id} 
-              className="conference-item"
-              onClick={() => onSelectConference(conf.id)}
-              style={{ cursor: 'pointer' }}
-            >
-              <strong>{conf.title}</strong>
-              <p>{conf.date}</p>
-            </div>
-          ));
-        }
-    
-        if (userRole === "author") {
-          return conferences?.map((conf) => (
-            <div key={conf.id} className="conference-item">
-              <strong>{conf.title}</strong>
-              <p>{conf.description}</p>
-              <p>{conf.date}</p>
-              {registeredConferences.includes(conf.id) ? (
-                <button 
-                  onClick={() => onSelectConference(conf.id)}
-                  className="select-button"
-                >
-                  Vizualizează
-                </button>
-              ) : (
+      if (userRole === "organizer") {
+        return conferences?.map((conf) => (
+          <div 
+            key={conf.id} 
+            className="conference-item"
+            onClick={() => onSelectConference(conf.id)}
+            style={{ cursor: 'pointer' }}
+          >
+            <strong>{conf.title}</strong>
+            <p>{conf.date}</p>
+            <p>
+              <strong>Revieweri:</strong>{" "}
+              {conf.reviewers.map((rev) => rev.name).join(", ")}
+            </p>
+          </div>
+        ));
+      }
+  
+      if (userRole === "reviewer") {
+        const assignedConferences = conferences?.filter((conf) =>
+          conf.reviewers.some((rev) => rev.id === reviewerId)
+        );
+      
+        return assignedConferences?.map((conf) => (
+          <div 
+            key={conf.id} 
+            className="conference-item"
+            onClick={() => onSelectConference(conf.id)}
+            style={{ cursor: 'pointer' }}
+          >
+            <strong>{conf.title}</strong>
+            <p>{conf.date}</p>
+          </div>
+        ));
+      }
+  
+      if (userRole === "author") {
+        const conferencesToShow = viewMode === 'registered' 
+          ? conferences?.filter(conf => registeredConferences.includes(conf.id))
+          : conferences;
+  
+        return conferencesToShow?.map((conf) => (
+          <div key={conf.id} className="conference-item">
+            <strong>{conf.title}</strong>
+            <p>{conf.description}</p>
+            <p>{conf.date}</p>
+            {registeredConferences.includes(conf.id) ? (
+              <button 
+                onClick={() => onSelectConference(conf.id)}
+                className="select-button"
+              >
+                Vizualizează
+              </button>
+            ) : (
+              viewMode === 'all' && (
                 <button 
                   onClick={() => onRegister(conf.id)}
                   className="register-button"
                 >
                   Înscrie-te
                 </button>
-              )}
-            </div>
-          ));
-        }
-      };
+              )
+            )}
+          </div>
+        ));
+      }
+    };
     
   
     return (
@@ -147,6 +154,25 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             +
           </button>
         )}
+
+        {userRole === "author" && (
+        <div className="view-mode-buttons">
+          <button 
+            className={`view-mode-button ${viewMode === 'all' ? 'active' : ''}`}
+            onClick={() => setViewMode('all')}
+          >
+            Toate conferințele
+          </button>
+          <button 
+            className={`view-mode-button ${viewMode === 'registered' ? 'active' : ''}`}
+            onClick={() => setViewMode('registered')}
+          >
+            Conferințele mele
+          </button>
+        </div>
+        )}
+
+
         <div className="conference-list">
         {renderConferences()}
         </div>

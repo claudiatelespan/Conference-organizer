@@ -7,8 +7,6 @@ const AuthorView = ({
   onRegister, 
   onUploadArticle 
 }) => {
-  const [showHistory, setShowHistory] = useState({});
-  
   const handleFileUpload = (event, existingArticleId = null) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -21,23 +19,21 @@ const AuthorView = ({
         uploadDate: new Date().toISOString(),
       };
 
-      if (existingArticleId) {
-        // Upload new version
-        const existingArticle = articles.find(a => a.id === existingArticleId);
-        const updatedArticle = {
-          ...articleData,
-          history: [...(existingArticle.history || []), {
-            ...existingArticle,
-            versionDate: new Date().toISOString()
-          }]
-        };
-        onUploadArticle(selectedConference.id, updatedArticle, existingArticleId);
-      } else {
-        // Upload new article
-        onUploadArticle(selectedConference.id, articleData);
-      }
+      onUploadArticle(selectedConference.id, articleData, existingArticleId);
     };
     reader.readAsText(file);
+  };
+
+  const handleDownload = (article) => {
+    const blob = new Blob([article.content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = article.title;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   if (!selectedConference) return <p>Selectează o conferință pentru a vedea detalii.</p>;
@@ -68,7 +64,13 @@ const AuthorView = ({
           <div className="articles-list">
             {articles.map((article) => (
               <div key={article.id} className="article-card">
-                <h3>{article.title}</h3>
+                <h3>{article.title}</h3>                  
+                <button 
+                    onClick={() => handleDownload(article)}
+                    className="download-button"
+                  >
+                    Descarcă articol
+                </button>
                 <p className="status">Status: {article.status}</p>
                 
                 <div className="reviews-section">
@@ -93,40 +95,7 @@ const AuthorView = ({
                   <label htmlFor={`update-${article.id}`} className="upload-button">
                     Încarcă versiune nouă
                   </label>
-                  
-                  {article.history?.length > 0 && (
-                    <button 
-                      onClick={() => setShowHistory(prev => ({
-                        ...prev, 
-                        [article.id]: !prev[article.id]
-                      }))}
-                      className="history-button"
-                    >
-                      {showHistory[article.id] ? 'Ascunde istoric' : 'Vezi istoric'}
-                    </button>
-                  )}
                 </div>
-
-                {showHistory[article.id] && article.history?.length > 0 && (
-                  <div className="history-section">
-                    <h4>Istoric versiuni:</h4>
-                    {article.history.map((version, idx) => (
-                      <div key={idx} className="version-card">
-                        <h5>Versiunea {idx + 1}</h5>
-                        <p>Încărcat la: {new Date(version.uploadDate).toLocaleDateString()}</p>
-                        <div className="version-reviews">
-                          {version.reviews?.map((review, reviewIdx) => (
-                            <div key={reviewIdx} className="review">
-                              <p><strong>Reviewer {reviewIdx + 1}:</strong></p>
-                              <p>{review.feedback}</p>
-                              <p>Status: {review.approved ? 'Aprobat' : 'Respins'}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </div>
