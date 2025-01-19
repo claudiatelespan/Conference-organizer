@@ -57,7 +57,7 @@ export const loginUser = async (credentials) => {
   
 
   //register
-  export const registerUser = async (credentials) => {
+export const registerUser = async (credentials) => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/register`, {
         method: "POST",
@@ -80,3 +80,32 @@ export const loginUser = async (credentials) => {
     }
   };
   
+  //reviewers
+  export const fetchReviewers = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+  
+      if (!token) {
+        throw new Error("JWT token not found. Please login first.");
+      }
+  
+      const response = await fetch(`${API_BASE_URL}/users/getAllReviewers`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch reviewers");
+      }
+  
+      const result = await response.json();
+      console.log(result);
+      return result.data;
+    } catch (error) {
+      console.error("Error in fetchReviewers:", error);
+      throw error; 
+    }
+};
