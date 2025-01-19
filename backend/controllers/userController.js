@@ -32,7 +32,6 @@ exports.login = async (req, res) => {
         }
     
         const token = jwt.sign({id: user.id}, process.env.SECRET_TOKEN, {expiresIn:'1h'});
-    
         res.status(200).send({success:true, message:"user found", data: {token, user}});
     
     } catch(error) {
@@ -85,3 +84,22 @@ exports.register = async (req, res) => {
     }
 }
 
+exports.getAllReviewers = async (req, res) => {
+
+    try{
+        const listaRevieweri = await userModel.findAll({
+            where: {
+                role: 'reviewer'
+            },
+            attributes: {
+                exclude: ['password']
+            }
+        });
+        res.status(200).send({message:"lista de revieweri", data: listaRevieweri});
+    
+    } catch(error) {
+        console.error(error)
+        res.status(500).send({message:"server error"});
+    }
+
+};

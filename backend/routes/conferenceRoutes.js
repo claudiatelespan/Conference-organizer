@@ -5,6 +5,7 @@ const {createConference, getAllConferences, updateConference, deleteConferenceBy
 const verifyToken = require('../middlewares/authMiddleware');
 
 router.post('/create', verifyToken, createConference);
+// router.get('/getAll', getAllConferences);
 router.get('/getAll', verifyToken, getAllConferences);
 router.put('/update/:id', verifyToken, updateConference)
 router.delete('/delete/:id', verifyToken, deleteConferenceById);

@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
+import { fetchReviewers, createConference } from "../Api.js"
 import "../App.css";
 
 const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,reviewerId,
   registeredConferences, onRegister
   }) => {
-    const mockReviewers = [
-      { id: 1, name: "Reviewer 1" },
-      { id: 2, name: "Reviewer 2" },
-      { id: 3, name: "Reviewer 3" },
-    ]; // Mock pentru lista de revieweri
+    // const mockReviewers = [
+    //   { id: 1, name: "Reviewer 1" },
+    //   { id: 2, name: "Reviewer 2" },
+    //   { id: 3, name: "Reviewer 3" },
+    // ]; // Mock pentru lista de revieweri
   
+    const [reviewers, setReviewers] = useState([]); 
     const [showForm, setShowForm] = useState(false);
     const [newConference, setNewConference] = useState({
       title: "",
@@ -22,6 +24,22 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
     const [selectedReviewer, setSelectedReviewer] = useState("");
     const [error, setError] = useState("");
   
+
+    useEffect(() => {
+      
+      const loadReviewers = async () => {
+        try {
+          const data = await fetchReviewers();
+          setReviewers(data); 
+        } catch (error) {
+          setError('Eroare la încărcarea reviewerilor');
+          console.error(error);
+        }
+      };
+      if(userRole==='organizer')
+        loadReviewers(); 
+    }, []); 
+
     const handleInputChange = (e) => {
       const { name, value } = e.target;
       setNewConference({ ...newConference, [name]: value });
@@ -29,7 +47,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
   
     const handleAddReviewer = () => {
       if (selectedReviewer) {
-        const reviewer = mockReviewers.find(
+        const reviewer = reviewers?.find(
           (rev) => rev.id === parseInt(selectedReviewer)
         );
   
@@ -54,27 +72,35 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
       });
     };
   
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
       e.preventDefault();
-  
-      if (newConference.reviewers.length !== 2 ) {
+    
+      if (newConference.reviewers.length !== 2) {
         setError("Trebuie să adaugi exact 2 revieweri!");
         return;
       }
-  
-      // Notifică componenta părinte despre conferința nouă
-      onAddConference({
-        id: conferences? conferences.length + 1 : 0,
-        title: newConference.title,
-        description: newConference.description,
-        date: newConference.date,
-        reviewers: newConference.reviewers,
-      });
-  
-      // Resetează formularul și închide modalul
-      setNewConference({ title: "", description: "", date: "", reviewers: [] });
-      setShowForm(false);
+    
+      try {
+        const conferenceData = {
+          title: newConference.title,
+          description: newConference.description,
+          date: newConference.date,
+          organizer_id: localStorage.getItem('userId'),
+          reviewers: newConference.reviewers.map(reviewer => reviewer.id),
+        };
+    
+        const result = await createConference(conferenceData);
+        result.conference.reviewers = newConference.reviewers;
+        onAddConference(result.conference);
+    
+        setNewConference({ title: "", description: "", date: "", reviewers: [] });
+        setShowForm(false);
+    
+      } catch (error) {
+        setError(error.message || "Eroare la trimiterea datelor către server");
+      }
     };
+    
 
     const renderConferences = () => {
       if (userRole === "organizer") {
@@ -89,7 +115,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             <p>{conf.date}</p>
             <p>
               <strong>Revieweri:</strong>{" "}
-              {conf.reviewers.map((rev) => rev.name).join(", ")}
+              {conf?.reviewers?.map((rev) => rev.email).join("\n")}
             </p>
           </div>
         ));
@@ -219,9 +245,9 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
                       onChange={(e) => setSelectedReviewer(e.target.value)}
                     >
                       <option value="">Selectează un reviewer</option>
-                      {mockReviewers.map((reviewer) => (
+                      {reviewers?.map((reviewer) => (
                         <option key={reviewer.id} value={reviewer.id}>
-                          {reviewer.name}
+                          {reviewer.email}
                         </option>
                       ))}
                     </select>
@@ -234,9 +260,9 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
                     </button>
                   </div>
                   <ul>
-                    {newConference.reviewers.map((rev) => (
+                    {newConference?.reviewers?.map((rev) => (
                       <li key={rev.id}>
-                        {rev.name}{" "}
+                        {rev.email}{" "}
                         <button
                           type="button"
                           onClick={() => handleRemoveReviewer(rev.id)}
