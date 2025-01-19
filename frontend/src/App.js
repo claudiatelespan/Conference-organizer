@@ -6,8 +6,8 @@ import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
 
 const App = () => {
-  const userRole = "organizer";
-  const reviewerId = 1;
+  const userRole = "author";
+  const reviewerId = 2;
   const authorId = 1;
 
   const [conferences, setConferences] = useState([

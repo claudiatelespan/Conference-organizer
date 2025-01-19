@@ -63,6 +63,11 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
               className={`article-card ${isFullyApproved ? 'approved' : ''}`}
             >
               <h3>{article.title}</h3>
+              <button
+                onClick={() => handleDownload(article.fileUrl)}
+              >
+                Descarcă articol
+              </button>
               <p><strong>Autor:</strong> {article.author}</p>
               <p>
                 <strong>Status:</strong>{' '}
