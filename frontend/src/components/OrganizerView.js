@@ -2,16 +2,15 @@ import React, { useState } from "react";
 
 const OrganizerView = ({ conference, articles }) => {
 
-  const filteredArticles = articles.filter(
-    (article) => article.conferenceId === conference.id
-  );
+  const filteredArticles = articles;
 
   // Funcție pentru a descărca fișierul unui articol
-  const handleDownload = (fileUrl) => {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = fileUrl.split("/").pop();
-    link.click();
+  const handleDownload = (fileName) => {
+    const baseUrl = "http://localhost:1234/uploads"; // Backend-ul tău
+    const fullUrl = `${baseUrl}/${fileName}`;
+  
+    // Deschide URL-ul în browser pentru descărcare
+    window.open(fullUrl, "_blank");
   };
 
   // Funcție pentru a reseta statusul unui articol (în cazul unui upload nou)
@@ -28,12 +27,12 @@ const OrganizerView = ({ conference, articles }) => {
     <div>
       <h2>Detalii conferință: {conference.title}</h2>
       <div className="article-list">
-        {filteredArticles.length > 0 ? (
-          filteredArticles.map((article) => (
+        {filteredArticles?.length > 0 ? (
+          filteredArticles?.map((article) => (
             <div key={article.id} className="article-item">
               <h3>{article.title}</h3>
               <button
-                onClick={() => handleDownload(article.fileUrl)}
+                onClick={() => handleDownload(article.filePath)}
               >
                 Descarcă articol
               </button>
@@ -41,8 +40,8 @@ const OrganizerView = ({ conference, articles }) => {
               <p><strong>Status:</strong> {article.status}</p>
               <p><strong>Review-uri:</strong></p>
               <ul>
-                {article.reviews.length > 0 ? (
-                  article.reviews.map((review, index) => (
+                {article?.reviews?.length > 0 ? (
+                  article?.reviews.map((review, index) => (
                     <li key={index}>
                       <strong>{review.reviewerId}:</strong> {review.feedback} -{" "}
                       {review.approved ? "Aprobat" : "În așteptare"}

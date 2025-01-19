@@ -140,3 +140,30 @@ export const createConference = async (conferenceData) => {
     throw error; 
   }
 };
+
+//ia articole pt selectare conferinta
+
+export const fetchArticlesByConference = async (conferenceId) => {
+  try {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE_URL}/articles/getAllArticlesPerConference/${conferenceId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch articles');
+    }
+
+    const data = await response.json();
+    console.log(data.articles);
+    return data.articles;
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    throw error;
+  }
+};

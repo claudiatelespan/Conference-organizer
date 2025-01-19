@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import OrganizerView from "./components/OrganizerView.js";
 import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
-import { fetchConferences, loginUser } from "./Api.js";
+import { fetchConferences, loginUser, fetchArticlesByConference } from "./Api.js";
 
 
 const App = () => {
@@ -53,50 +53,8 @@ const App = () => {
     if (isAuthenticated)
       loadConferences();
   }, [isAuthenticated]);
-  // const [conferences, setConferences] = useState([
-  //   {
-  //     id: 1,
-  //     title: "Conferința Internațională de Tehnologie",
-  //     description: "Detalii despre conferința 1",
-  //     date: "2025-01-20",
-  //     reviewers: [{ id: 1, name: "Reviewer 1" }, { id: 2, name: "Reviewer 2" }],
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Conferința de Inteligență Artificială",
-  //     description: "Detalii despre conferința 2",
-  //     date: "2025-03-15",
-  //     reviewers: [{ id: 3, name: "Reviewer 3" }],
-  //   }
-  // ]);
 
-  const [articles, setArticles] = useState([
-    {
-      id: 1,
-      title: "Articol despre React",
-      author: "Autor 1",
-      status: "pending",
-      conferenceId: 1,
-      fileUrl: "backend/uploads/1737242076008-tw.docx",
-      reviews: [
-        { reviewerId: 1, feedback: "Foarte bine", approved: false },
-        { reviewerId: 2, feedback: "Necesită îmbunătățiri", approved: true },
-      ],
-    },
-    {
-      id: 2,
-      title: "Articol despre Inteligență Artificială",
-      author: "Autor 2",
-      status: "accepted",
-      conferenceId: 1,
-      fileUrl: "/files/articol_ai.pdf",
-      reviews: [
-        { reviewerId: 1, feedback: "Excelent!", approved: true },
-        { reviewerId: 2, feedback: "Aprobat!", approved: false},
-      ],
-    },
-  ]);
-
+  const [articles, setArticles] = useState([]);
   const [selectedConference, setSelectedConference] = useState(null);
   const [registeredConferences, setRegisteredConferences] = useState([]);
 
@@ -104,9 +62,15 @@ const App = () => {
     setConferences((prevConferences) => [...prevConferences, newConference]);
   };
 
-  const handleConferenceSelect = (conferenceId) => {
+  const handleConferenceSelect = async (conferenceId) => {
     const conference = conferences.find((conf) => conf.id === conferenceId);
     setSelectedConference(conference);
+    try {
+      const articlesData = await fetchArticlesByConference(conferenceId);
+      setArticles(articlesData);
+    } catch (error) {
+      setError("Failed to load articles. Please try again later.");
+    }
   };
 
   const handleUpdateReview = (articleId, reviewerId, updates) => {
@@ -204,7 +168,7 @@ const App = () => {
         />
         <div className="main-content">
           {currentUser.role === "organizer" && selectedConference && (
-            <OrganizerView conference={selectedConference} />
+            <OrganizerView conference={selectedConference} articles={articles} />
           )}
           {currentUser.role === "author" && (
             <AuthorView
