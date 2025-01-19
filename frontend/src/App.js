@@ -1,4 +1,5 @@
 import './App.css';
+import LoginView from './components/LoginView';
 import Sidebar from './components/Sidebar.js';
 import React, { useState } from "react";
 import OrganizerView from "./components/OrganizerView.js";
@@ -9,6 +10,16 @@ const App = () => {
   const userRole = "reviewer";
   const reviewerId = 1;
   const authorId = 1;
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const hardcodedUser = {
+    email: "reviewer1@example.com",  // Changed from username
+    password: "password123",
+    role: "reviewer",
+    id: 1
+  };
+
 
   const [conferences, setConferences] = useState([
     {
@@ -123,47 +134,63 @@ const App = () => {
     }
   };
 
+  const handleLogin = (credentials) => {
+    if (credentials.username === hardcodedUser.username && 
+        credentials.password === hardcodedUser.password) {
+      setIsAuthenticated(true);
+      setCurrentUser(hardcodedUser);
+    } else {
+      alert("Credențiale invalide!");
+    }
+  };
+
   return (
-    <div className='dashboard-container'>
-      <Sidebar
-        conferences={conferences}
-        onAddConference={handleAddConference}
-        onSelectConference={handleConferenceSelect}
-        userRole={userRole}
-        reviewerId={reviewerId}
-        registeredConferences={registeredConferences}
-        onRegister={handleRegisterToConference}
-      />
-      <div className="main-content">
-        {userRole === "organizer" && selectedConference && (
-          <OrganizerView 
-          conference={selectedConference}
-          articles={articles}
-           />
-        )}
-        {userRole === "author" && (
-          <AuthorView
-            selectedConference={selectedConference}
-            isRegistered={selectedConference ? registeredConferences.includes(selectedConference.id) : false}
-            articles={articles.filter(a => a.authorId === authorId && a.conferenceId === selectedConference?.id)}
-            onRegister={() => handleRegisterToConference(selectedConference?.id)}
-            onUploadArticle={handleArticleUpload}
-          />
-        )}
-        {userRole === "reviewer" && selectedConference && (
-          <ReviewerView
-            selectedConference={selectedConference}
-            articles={articles}
-            reviewerId={reviewerId}
-            onUpdateReview={handleUpdateReview}
-          />
-        )}
-        {!selectedConference && (
-          <p>Please select a conference to view details.</p>
-        )}
+  <div className='dashboard-container'>
+    {!isAuthenticated ? (
+      <div className="full-width-container">
+        <LoginView onLogin={handleLogin} />
       </div>
-    </div>
-  );
+    ) : (
+      <>
+        <Sidebar
+          conferences={conferences}
+          onAddConference={handleAddConference}
+          onSelectConference={handleConferenceSelect}
+          userRole={currentUser.role}
+          reviewerId={currentUser.id}
+          registeredConferences={registeredConferences}
+          onRegister={handleRegisterToConference}
+        />
+        <div className="main-content">
+          {currentUser.role === "organizer" && selectedConference && (
+            <OrganizerView conference={selectedConference} />
+          )}
+          {currentUser.role === "author" && (
+            <AuthorView
+              selectedConference={selectedConference}
+              isRegistered={selectedConference ? registeredConferences.includes(selectedConference.id) : false}
+              articles={articles.filter(a => a.authorId === currentUser.id && a.conferenceId === selectedConference?.id)}
+              onRegister={() => handleRegisterToConference(selectedConference?.id)}
+              onUploadArticle={handleArticleUpload}
+            />
+          )}
+          {currentUser.role === "reviewer" && selectedConference && (
+            <ReviewerView
+              selectedConference={selectedConference}
+              articles={articles}
+              reviewerId={currentUser.id}
+              onUpdateReview={handleUpdateReview}
+            />
+          )}
+          {!selectedConference && (
+            <p>Please select a conference to view details.</p>
+          )}
+        </div>
+      </>
+  )}
+</div>
+);
 };
+
 
 export default App;
