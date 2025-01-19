@@ -111,7 +111,7 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
                       <button 
                         onClick={() => handleApproveArticle(article.id)}
                         className="approve-button"
-                        disabled={!submittedFeedback}
+                        // disabled={!submittedFeedback}
                       >
                         Aprobă
                       </button>
