@@ -2,6 +2,11 @@ const conferenceModel = require('../models').conference;
 const userModel = require('../models').user;
 const conferenceReviewersModel = require('../models').conferenceReviewers;
 
+//conferintele la care e alocat un reviewer
+//la fel pt autor la care e inscris
+//la fel pt org pe cele pe care le a facut 
+
+
 const createConference = async (req, res) => {
     try {
      
