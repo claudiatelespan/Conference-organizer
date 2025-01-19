@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const dotenv = require('dotenv');
-const { user } = require('../models/index');
+
 
 dotenv.config();
 
@@ -82,3 +82,4 @@ exports.register = async (req, res) => {
        
     }
 }
+
