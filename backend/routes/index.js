@@ -6,7 +6,7 @@ const userRouter = require('./userRoutes');
 const authorConferenceRouter = require('./authorConferenceRoutes');
 const articleRouter = require('./articleRoutes');
 
-router.use('/conference', conferenceRouter);
+router.use('/conferences', conferenceRouter);
 router.use('/users', userRouter);
 router.use('/conferenceRegistration', authorConferenceRouter);
 router.use('/articles', articleRouter);
