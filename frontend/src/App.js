@@ -6,7 +6,7 @@ import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
 
 const App = () => {
-  const userRole = "author";
+  const userRole = "organizer";
   const reviewerId = 1;
   const authorId = 1;
 
@@ -34,10 +34,10 @@ const App = () => {
       author: "Autor 1",
       status: "pending",
       conferenceId: 1,
-      fileUrl: "/files/articol_react.pdf",
+      fileUrl: "backend/uploads/1737242076008-tw.docx",
       reviews: [
         { reviewerId: 1, feedback: "Foarte bine", approved: false },
-        { reviewerId: 2, feedback: "Necesită îmbunătățiri", approved: false },
+        { reviewerId: 2, feedback: "Necesită îmbunătățiri", approved: true },
       ],
     },
     {
@@ -45,11 +45,11 @@ const App = () => {
       title: "Articol despre Inteligență Artificială",
       author: "Autor 2",
       status: "accepted",
-      conferenceId: 2,
+      conferenceId: 1,
       fileUrl: "/files/articol_ai.pdf",
       reviews: [
         { reviewerId: 1, feedback: "Excelent!", approved: true },
-        { reviewerId: 2, feedback: "Aprobat!", approved: true },
+        { reviewerId: 2, feedback: "Aprobat!", approved: false},
       ],
     },
   ]);

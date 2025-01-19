@@ -10,7 +10,7 @@ const OrganizerView = ({ conference, articles }) => {
   const handleDownload = (fileUrl) => {
     const link = document.createElement("a");
     link.href = fileUrl;
-    link.download = fileUrl.split("/").pop(); // Numele fișierului din URL
+    link.download = fileUrl.split("/").pop();
     link.click();
   };
 
