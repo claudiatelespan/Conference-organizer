@@ -6,8 +6,9 @@ const verifyToken = require('../middlewares/authMiddleware');
 const { getArticlesByConference } = require('../controllers/articleController');
 const { reviewArticle, updateArticle } = require('../controllers/articleController');
 
-router.post('/upload',verifyToken, upload.single('file'), uploadArticle);
+router.post('/upload', upload.single('file'), uploadArticle);
 router.get('/getAllArticlesPerConference/:conferenceId',verifyToken, getArticlesByConference);
 router.post('/review/:articleId', reviewArticle);
+router.put('/:articleId', upload.single('file'), updateArticle);
 
 module.exports = router;
