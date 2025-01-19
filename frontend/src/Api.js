@@ -5,7 +5,7 @@ const API_BASE_URL = "http://localhost:1234/api";
 
 export const fetchConferences = async () => {
     try {
-      const token = localStorage.getItem("authToken"); // Preluăm JWT-ul din localStorage
+      const token = localStorage.getItem("authToken"); 
   
       if (!token) {
         throw new Error("JWT token not found. Please login first.");
@@ -15,7 +15,7 @@ export const fetchConferences = async () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // Adăugăm header-ul Authorization
+          Authorization: `Bearer ${token}` 
         },
       });
   
@@ -24,11 +24,10 @@ export const fetchConferences = async () => {
       }
   
       const result = await response.json();
-      console.log(result);
-      return result.data; // Returnează doar datele necesare
+      return result.data; 
     } catch (error) {
       console.error("Error in fetchConferences:", error);
-      throw error; // Aruncă eroarea pentru a putea fi tratată în componentă
+      throw error;
     }
   };
 
@@ -102,7 +101,6 @@ export const registerUser = async (credentials) => {
       }
   
       const result = await response.json();
-      console.log(result);
       return result.data;
     } catch (error) {
       console.error("Error in fetchReviewers:", error);
@@ -111,8 +109,6 @@ export const registerUser = async (credentials) => {
 };
 
 //creare conferinta
-
-// Api.js
 
 export const createConference = async (conferenceData) => {
   try {

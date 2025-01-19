@@ -90,7 +90,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
         };
     
         const result = await createConference(conferenceData);
-        
+        result.conference.reviewers = newConference.reviewers;
         onAddConference(result.conference);
     
         setNewConference({ title: "", description: "", date: "", reviewers: [] });
@@ -115,7 +115,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             <p>{conf.date}</p>
             <p>
               <strong>Revieweri:</strong>{" "}
-              {conf?.reviewers?.map((rev) => rev.name).join(", ")}
+              {conf?.reviewers?.map((rev) => rev.email).join("\n")}
             </p>
           </div>
         ));
