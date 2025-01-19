@@ -1,5 +1,5 @@
 import React, { useState , useEffect} from "react";
-import { fetchReviewers } from "../Api.js"
+import { fetchReviewers, createConference } from "../Api.js"
 import "../App.css";
 
 const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,reviewerId,
@@ -72,27 +72,35 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
       });
     };
   
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
       e.preventDefault();
-  
-      if (newConference.reviewers.length !== 2 ) {
+    
+      if (newConference.reviewers.length !== 2) {
         setError("Trebuie să adaugi exact 2 revieweri!");
         return;
       }
-  
-      // Notifică componenta părinte despre conferința nouă
-      onAddConference({
-        id: conferences? conferences.length + 1 : 0,
-        title: newConference.title,
-        description: newConference.description,
-        date: newConference.date,
-        reviewers: newConference.reviewers,
-      });
-  
-      // Resetează formularul și închide modalul
-      setNewConference({ title: "", description: "", date: "", reviewers: [] });
-      setShowForm(false);
+    
+      try {
+        const conferenceData = {
+          title: newConference.title,
+          description: newConference.description,
+          date: newConference.date,
+          organizer_id: localStorage.getItem('userId'),
+          reviewers: newConference.reviewers.map(reviewer => reviewer.id),
+        };
+    
+        const result = await createConference(conferenceData);
+        
+        onAddConference(result.conference);
+    
+        setNewConference({ title: "", description: "", date: "", reviewers: [] });
+        setShowForm(false);
+    
+      } catch (error) {
+        setError(error.message || "Eroare la trimiterea datelor către server");
+      }
     };
+    
 
     const renderConferences = () => {
       if (userRole === "organizer") {
@@ -254,7 +262,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
                   <ul>
                     {newConference?.reviewers?.map((rev) => (
                       <li key={rev.id}>
-                        {rev.name}{" "}
+                        {rev.email}{" "}
                         <button
                           type="button"
                           onClick={() => handleRemoveReviewer(rev.id)}

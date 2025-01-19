@@ -32,7 +32,6 @@ exports.login = async (req, res) => {
         }
     
         const token = jwt.sign({id: user.id}, process.env.SECRET_TOKEN, {expiresIn:'1h'});
-    
         res.status(200).send({success:true, message:"user found", data: {token, user}});
     
     } catch(error) {

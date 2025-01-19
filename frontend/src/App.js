@@ -170,10 +170,10 @@ const App = () => {
     try {
       const data = await loginUser(credentials);
       const { token, user } = data.data;
-      console.log(token);
   
       // Stochează token-ul în localStorage pentru autentificare ulterioară
       localStorage.setItem("authToken", token);
+      localStorage.setItem("userId", user.id)
   
       // Actualizează starea
       setIsAuthenticated(true);

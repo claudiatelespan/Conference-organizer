@@ -109,3 +109,38 @@ export const registerUser = async (credentials) => {
       throw error; 
     }
 };
+
+//creare conferinta
+
+// Api.js
+
+export const createConference = async (conferenceData) => {
+  try {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      throw new Error("JWT token not found. Please login first.");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/conferences/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(conferenceData),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Eroare la crearea conferinței");
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error("Error in createConference:", error);
+    throw error; 
+  }
+};
