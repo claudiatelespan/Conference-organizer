@@ -6,7 +6,7 @@ import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
 
 const App = () => {
-  const userRole = "organizer";
+  const userRole = "author";
   const reviewerId = 1;
   const authorId = 1;
 
@@ -86,30 +86,41 @@ const App = () => {
     setRegisteredConferences(prev => [...prev, conferenceId]);
   };
 
-  const handleArticleUpload = (conferenceId, articleData) => {
-    // Alocă random 2 revieweri din conferința selectată
-    const conference = conferences.find(c => c.id === conferenceId);
-    const availableReviewers = conference.reviewers;
-    const selectedReviewers = availableReviewers
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 2);
+  const handleArticleUpload = (conferenceId, articleData, existingArticleId = null) => {
+    if (existingArticleId) {
+      // Update existing article
+      setArticles(prevArticles => 
+        prevArticles.map(article => {
+          if (article.id === existingArticleId) {
+            return {
+              ...article,
+              ...articleData,
+              reviews: article.reviews // Keeping existing reviews
+            };
+          }
+          return article;
+        })
+      );
+    } else {
+      // Create new article
+      const conference = conferences.find(c => c.id === conferenceId);
+      const selectedReviewers = conference.reviewers;
 
-    const newArticle = {
-      id: articles.length + 1,
-      conferenceId,
-      authorId,
-      ...articleData,
-      status: "pending",
-      reviewers: selectedReviewers,
-      reviews: selectedReviewers.map(reviewer => ({
-        reviewerId: reviewer.id,
-        feedback: "",
-        approved: false
-      })),
-      history: []
-    };
+      const newArticle = {
+        id: articles.length + 1,
+        conferenceId,
+        authorId,
+        ...articleData,
+        status: "pending",
+        reviews: selectedReviewers.map(reviewer => ({
+          reviewerId: reviewer.id,
+          feedback: "",
+          approved: false
+        }))
+      };
 
-    setArticles(prev => [...prev, newArticle]);
+      setArticles(prev => [...prev, newArticle]);
+    }
   };
 
   return (
