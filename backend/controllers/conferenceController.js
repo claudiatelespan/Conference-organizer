@@ -145,10 +145,46 @@ const deleteConferenceById = async(req, res) => {
     }
 }
 
+
+const getConferencesByReviewer = async (req, res) => {
+  try {
+
+    const { reviewerId } = req.params;
+ const conferences = await conferenceModel.findAll({
+      include: [
+        {
+          model: conferenceReviewersModel,
+          as: 'conferenceReviewers', 
+          where: { reviewerId }, 
+          attributes: [], 
+        },
+      ],
+    });
+
+   
+    if (!conferences || conferences.length === 0) {
+      return res.status(404).send({ message: 'Reviewer-ul nu este alocat la nicio conferință.' });
+    }
+
+
+    res.status(200).send({
+      message: `Conferințele la care este alocat reviewer-ul cu ID-ul ${reviewerId}:`,
+      conferences,
+    });
+  } catch (error) {
+    console.error('Eroare la preluarea conferințelor:', error);
+    res.status(500).send({ message: 'Eroare internă de server.' });
+  }
+};
+
+
+
 module.exports = {
     createConference,
     getAllConferences,
     getConferenceById,
     updateConference,
-    deleteConferenceById
+    deleteConferenceById,
+    getConferencesByReviewer,
+
 }

@@ -7,7 +7,7 @@ import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
 
 const App = () => {
-  const userRole = "organizer";
+  const userRole = "reviewer";
   const reviewerId = 1;
   const authorId = 1;
 
@@ -41,21 +41,27 @@ const App = () => {
   const [articles, setArticles] = useState([
     {
       id: 1,
-      title: "Article 1",
-      author: "Author 1",
-      feedback: "Needs more citations",
+      title: "Articol despre React",
+      author: "Autor 1",
       status: "pending",
-      reviewerId: 101,
       conferenceId: 1,
+      fileUrl: "backend/uploads/1737242076008-tw.docx",
+      reviews: [
+        { reviewerId: 1, feedback: "Foarte bine", approved: false },
+        { reviewerId: 2, feedback: "Necesită îmbunătățiri", approved: true },
+      ],
     },
     {
       id: 2,
-      title: "Article 2",
-      author: "Author 2",
-      feedback: "",
-      status: "pending",
-      reviewerId: 102,
+      title: "Articol despre Inteligență Artificială",
+      author: "Autor 2",
+      status: "accepted",
       conferenceId: 1,
+      fileUrl: "/files/articol_ai.pdf",
+      reviews: [
+        { reviewerId: 1, feedback: "Excelent!", approved: true },
+        { reviewerId: 2, feedback: "Aprobat!", approved: false},
+      ],
     },
   ]);
 
@@ -91,30 +97,41 @@ const App = () => {
     setRegisteredConferences(prev => [...prev, conferenceId]);
   };
 
-  const handleArticleUpload = (conferenceId, articleData) => {
-    // Alocă random 2 revieweri din conferința selectată
-    const conference = conferences.find(c => c.id === conferenceId);
-    const availableReviewers = conference.reviewers;
-    const selectedReviewers = availableReviewers
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 2);
+  const handleArticleUpload = (conferenceId, articleData, existingArticleId = null) => {
+    if (existingArticleId) {
+      // Update existing article
+      setArticles(prevArticles => 
+        prevArticles.map(article => {
+          if (article.id === existingArticleId) {
+            return {
+              ...article,
+              ...articleData,
+              reviews: article.reviews // Keeping existing reviews
+            };
+          }
+          return article;
+        })
+      );
+    } else {
+      // Create new article
+      const conference = conferences.find(c => c.id === conferenceId);
+      const selectedReviewers = conference.reviewers;
 
-    const newArticle = {
-      id: articles.length + 1,
-      conferenceId,
-      authorId,
-      ...articleData,
-      status: "pending",
-      reviewers: selectedReviewers,
-      reviews: selectedReviewers.map(reviewer => ({
-        reviewerId: reviewer.id,
-        feedback: "",
-        approved: false
-      })),
-      history: []
-    };
+      const newArticle = {
+        id: articles.length + 1,
+        conferenceId,
+        authorId,
+        ...articleData,
+        status: "pending",
+        reviews: selectedReviewers.map(reviewer => ({
+          reviewerId: reviewer.id,
+          feedback: "",
+          approved: false
+        }))
+      };
 
-    setArticles(prev => [...prev, newArticle]);
+      setArticles(prev => [...prev, newArticle]);
+    }
   };
 
   const handleLogin = (credentials) => {
@@ -131,8 +148,8 @@ const App = () => {
   <div className='dashboard-container'>
     {!isAuthenticated ? (
       <div className="full-width-container">
-      <LoginView onLogin={handleLogin} />
-    </div>
+        <LoginView onLogin={handleLogin} />
+      </div>
     ) : (
       <>
         <Sidebar
@@ -174,5 +191,6 @@ const App = () => {
 </div>
 );
 };
+
 
 export default App;

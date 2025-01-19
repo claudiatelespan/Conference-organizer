@@ -74,6 +74,16 @@ user.belongsToMany(conference, {
     foreignKey: 'reviewerId'
 });
 
+conference.hasMany(conferenceReviewers, {
+    foreignKey: 'conferenceId',
+    as: 'conferenceReviewers', 
+});
+
+conferenceReviewers.belongsTo(conference, {
+    foreignKey: 'conferenceId',
+    as: 'conference',
+});
+
 module.exports = {
     connection: db,
     user,
