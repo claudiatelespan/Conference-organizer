@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { handleDownload } from "../Utils.js";
+
 
 const AuthorView = ({ 
   selectedConference, 
@@ -24,17 +26,6 @@ const AuthorView = ({
     reader.readAsText(file);
   };
 
-  const handleDownload = (article) => {
-    const blob = new Blob([article.content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = article.title;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
 
   if (!selectedConference) return <p>Selectează o conferință pentru a vedea detalii.</p>;
 
@@ -66,7 +57,7 @@ const AuthorView = ({
               <div key={article.id} className="article-card">
                 <h3>{article.title}</h3>                  
                 <button 
-                    onClick={() => handleDownload(article)}
+                    onClick={() => handleDownload(article.filePath)}
                     className="download-button"
                   >
                     Descarcă articol

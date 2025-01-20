@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "../App.css";
+import { handleDownload } from "../Utils.js";
+
 
 const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview }) => {
   const [tempFeedback, setTempFeedback] = useState({});
@@ -40,13 +42,6 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
     onUpdateReview(articleId, reviewerId, { approved: true });
   };
 
-  const handleDownload = (fileUrl) => {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = fileUrl.split("/").pop();
-    link.click();
-  };
-
   return (
     <div className="reviewer-view">
       <h2>Articole de evaluat pentru: {selectedConference.title}</h2>
@@ -64,7 +59,7 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
             >
               <h3>{article.title}</h3>
               <button
-                onClick={() => handleDownload(article.fileUrl)}
+                onClick={() => handleDownload(article.filePath)}
               >
                 Descarcă articol
               </button>

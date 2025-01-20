@@ -1,17 +1,9 @@
 import React, { useState } from "react";
+import { handleDownload } from "../Utils.js";
 
 const OrganizerView = ({ conference, articles }) => {
 
   const filteredArticles = articles;
-
-  // Funcție pentru a descărca fișierul unui articol
-  const handleDownload = (fileName) => {
-    const baseUrl = "http://localhost:1234/uploads"; // Backend-ul tău
-    const fullUrl = `${baseUrl}/${fileName}`;
-  
-    // Deschide URL-ul în browser pentru descărcare
-    window.open(fullUrl, "_blank");
-  };
 
   // Funcție pentru a reseta statusul unui articol (în cazul unui upload nou)
   // const handleResetStatus = (articleId) => {

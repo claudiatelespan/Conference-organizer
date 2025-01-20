@@ -171,7 +171,7 @@ const App = () => {
             <AuthorView
               selectedConference={selectedConference}
               isRegistered={selectedConference ? registeredConferences.includes(selectedConference.id) : false}
-              articles={articles.filter(a => a.authorId === currentUser.id && a.conferenceId === selectedConference?.id)}
+              articles={articles.filter(a => a.authorId === parseInt(localStorage.getItem('userId')) && a.conferenceId === selectedConference?.id)}
               onRegister={() => handleRegisterToConference(selectedConference?.id)}
               onUploadArticle={handleArticleUpload}
             />
