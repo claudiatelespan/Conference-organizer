@@ -5,11 +5,6 @@ import "../App.css";
 const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,reviewerId,
   registeredConferences, onRegister
   }) => {
-    // const mockReviewers = [
-    //   { id: 1, name: "Reviewer 1" },
-    //   { id: 2, name: "Reviewer 2" },
-    //   { id: 3, name: "Reviewer 3" },
-    // ]; // Mock pentru lista de revieweri
   
     const [reviewers, setReviewers] = useState([]); 
     const [showForm, setShowForm] = useState(false);
@@ -101,6 +96,31 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
       }
     };
     
+    const renderActionButton = (conf) => {
+      const userId = parseInt(localStorage.getItem("userId"), 10);
+    
+      const isAuthorRegistered = conf.authors?.some(author => author.id === userId);
+    
+      if (isAuthorRegistered) {
+        return (
+          <button 
+            onClick={() => onSelectConference(conf.id)} 
+            className="view-button"
+          >
+            Vizualizează
+          </button>
+        );
+      } else {
+        return (
+          <button 
+            onClick={() => onRegister(conf.id)} 
+            className="register-button"
+          >
+            Înscrie-te
+          </button>
+        );
+      }
+    };
 
     const renderConferences = () => {
       if (userRole === "organizer") {
@@ -157,14 +177,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
                 Vizualizează
               </button>
             ) : (
-              viewMode === 'all' && (
-                <button 
-                  onClick={() => onRegister(conf.id)}
-                  className="register-button"
-                >
-                  Înscrie-te
-                </button>
-              )
+              viewMode === 'all' && renderActionButton(conf)
             )}
           </div>
         ));

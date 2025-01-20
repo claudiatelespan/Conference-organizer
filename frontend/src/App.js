@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import OrganizerView from "./components/OrganizerView.js";
 import AuthorView from "./components/AuthorView.js";
 import ReviewerView from "./components/ReviewerView.js";
-import { fetchConferences, loginUser, fetchArticlesByConference } from "./Api.js";
+import { fetchConferences, loginUser, fetchArticlesByConference, registerAuthorToConference } from "./Api.js";
 
 
 const App = () => {
@@ -16,47 +16,40 @@ const App = () => {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  // const hardcodedUser = {
-  //   email: "reviewer1@example.com",  
-  //   password: "password123",
-  //   role: "reviewer",
-  //   id: 1
-  // };
-
-  // const hardcodedUser2 = {
-  //   email: "author1@example.com",  
-  //   password: "password123",
-  //   role: "author",
-  //   id: 1
-  // };
-
-  // const hardcodedUser3 = {
-  //   email: "organizer1@example.com",  
-  //   password: "password123",
-  //   role: "organizer",
-  //   id: 1
-  // };
-
   const [conferences, setConferences] = useState([]);
   const [error, setError] = useState(null);
+  const [articles, setArticles] = useState([]);
+  const [selectedConference, setSelectedConference] = useState(null);
+  const [registeredConferences, setRegisteredConferences] = useState([]);
 
   useEffect(() => {
     const loadConferences = async () => {
       try {
+        // Obține userId din localStorage
+        const userId = parseInt(localStorage.getItem("userId"), 10);
+  
+        // Fetch pentru toate conferințele
         const data = await fetchConferences();
-        setConferences(data); // Actualizează lista de conferințe
+  
+        // Filtrăm conferințele la care utilizatorul este autor
+        const userRegisteredConferences = data.filter(conference =>
+          conference.authors?.some(author => author.id === userId)
+        );
+  
+        // Actualizăm stările
+        setConferences(data); // Lista completă de conferințe
+        setRegisteredConferences(userRegisteredConferences.map(conf => conf.id)); // ID-urile conferințelor înregistrate
       } catch (error) {
+        console.error("Error loading conferences:", error);
         setError("Failed to load conferences. Please try again later.");
       }
     };
-
-    if (isAuthenticated)
+  
+    // Se apelează doar dacă utilizatorul este autentificat
+    if (isAuthenticated) {
       loadConferences();
+    }
   }, [isAuthenticated]);
-
-  const [articles, setArticles] = useState([]);
-  const [selectedConference, setSelectedConference] = useState(null);
-  const [registeredConferences, setRegisteredConferences] = useState([]);
 
   const handleAddConference = (newConference) => {
     setConferences((prevConferences) => [...prevConferences, newConference]);
@@ -89,27 +82,33 @@ const App = () => {
     );
   };
 
-  const handleRegisterToConference = (conferenceId) => {
-    setRegisteredConferences(prev => [...prev, conferenceId]);
+  const handleRegisterToConference = async (conferenceId) => {
+    try {
+      await registerAuthorToConference(currentUser.id, conferenceId);
+  
+      setRegisteredConferences((prev) => [...prev, conferenceId]);
+  
+      alert("Te-ai înscris cu succes la conferință!");
+    } catch (error) {
+      alert(error.message || "Eroare la înscrierea la conferință.");
+    }
   };
 
   const handleArticleUpload = (conferenceId, articleData, existingArticleId = null) => {
     if (existingArticleId) {
-      // Update existing article
       setArticles(prevArticles => 
         prevArticles.map(article => {
           if (article.id === existingArticleId) {
             return {
               ...article,
               ...articleData,
-              reviews: article.reviews // Keeping existing reviews
+              reviews: article.reviews 
             };
           }
           return article;
         })
       );
     } else {
-      // Create new article
       const conference = conferences.find(c => c.id === conferenceId);
       const selectedReviewers = conference.reviewers;
 
@@ -135,11 +134,9 @@ const App = () => {
       const data = await loginUser(credentials);
       const { token, user } = data.data;
   
-      // Stochează token-ul în localStorage pentru autentificare ulterioară
       localStorage.setItem("authToken", token);
       localStorage.setItem("userId", user.id)
   
-      // Actualizează starea
       setIsAuthenticated(true);
       setCurrentUser(user);
   

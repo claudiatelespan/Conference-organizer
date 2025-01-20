@@ -1,4 +1,3 @@
-
 const API_BASE_URL = "http://localhost:1234/api";
 
 // Funcție pentru a prelua toate conferințele
@@ -167,3 +166,38 @@ export const fetchArticlesByConference = async (conferenceId) => {
     throw error;
   }
 };
+
+//inscrie un autor la conferinta
+
+export const registerAuthorToConference = async (authorId, conferenceId) => {
+  try {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      throw new Error("JWT token not found. Please login first.");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/conferenceRegistration/joinConference`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ authorId, conferenceId }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Eroare la înregistrarea la conferință");
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error("Error in registerAuthorToConference:", error);
+    throw error; 
+  }
+};
+
+
