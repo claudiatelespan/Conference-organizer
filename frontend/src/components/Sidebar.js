@@ -1,15 +1,11 @@
 import React, { useState , useEffect} from "react";
-import { fetchReviewers, createConference } from "../Api.js"
+import { fetchReviewers, createConference } from "../Api.js";
+import { formatDateToDayOnly } from "../Utils.js";
 import "../App.css";
 
 const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,reviewerId,
   registeredConferences, onRegister
   }) => {
-    // const mockReviewers = [
-    //   { id: 1, name: "Reviewer 1" },
-    //   { id: 2, name: "Reviewer 2" },
-    //   { id: 3, name: "Reviewer 3" },
-    // ]; // Mock pentru lista de revieweri
   
     const [reviewers, setReviewers] = useState([]); 
     const [showForm, setShowForm] = useState(false);
@@ -101,6 +97,31 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
       }
     };
     
+    const renderActionButton = (conf) => {
+      const userId = parseInt(localStorage.getItem("userId"), 10);
+    
+      const isAuthorRegistered = conf.authors?.some(author => author.id === userId);
+    
+      if (isAuthorRegistered) {
+        return (
+          <button 
+            onClick={() => onSelectConference(conf.id)} 
+            className="view-button"
+          >
+            Vizualizează
+          </button>
+        );
+      } else {
+        return (
+          <button 
+            onClick={() => onRegister(conf.id)} 
+            className="register-button upload-button"
+          >
+            Înscrie-te
+          </button>
+        );
+      }
+    };
 
     const renderConferences = () => {
       if (userRole === "organizer") {
@@ -112,10 +133,11 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             style={{ cursor: 'pointer' }}
           >
             <strong>{conf.title}</strong>
-            <p>{conf.date}</p>
+            <p>{conf.description}</p>
+            <p><strong>{formatDateToDayOnly(conf.date)}</strong></p>
             <p>
-              <strong>Revieweri:</strong>{" "}
-              {conf?.reviewers?.map((rev) => rev.email).join("\n")}
+              <strong>Revieweri: </strong>
+              <div dangerouslySetInnerHTML={{ __html: conf?.reviewers?.map((rev) => rev.email).join("<br/>") }} />
             </p>
           </div>
         ));
@@ -134,7 +156,8 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             style={{ cursor: 'pointer' }}
           >
             <strong>{conf.title}</strong>
-            <p>{conf.date}</p>
+            <p>{conf.description}</p>
+            <p><strong>{formatDateToDayOnly(conf.date)}</strong></p>
           </div>
         ));
       }
@@ -148,23 +171,16 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
           <div key={conf.id} className="conference-item">
             <strong>{conf.title}</strong>
             <p>{conf.description}</p>
-            <p>{conf.date}</p>
+            <p><strong>{formatDateToDayOnly(conf.date)}</strong></p>
             {registeredConferences.includes(conf.id) ? (
               <button 
                 onClick={() => onSelectConference(conf.id)}
-                className="select-button"
+                className="select-button download"
               >
                 Vizualizează
               </button>
             ) : (
-              viewMode === 'all' && (
-                <button 
-                  onClick={() => onRegister(conf.id)}
-                  className="register-button"
-                >
-                  Înscrie-te
-                </button>
-              )
+              viewMode === 'all' && renderActionButton(conf)
             )}
           </div>
         ));
@@ -266,6 +282,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
                         <button
                           type="button"
                           onClick={() => handleRemoveReviewer(rev.id)}
+                          className="delete-reviewer-button"
                         >
                           Șterge
                         </button>

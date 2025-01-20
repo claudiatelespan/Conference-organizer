@@ -1,6 +1,7 @@
 const conferenceModel = require('../models').conference;
 const userModel = require('../models').user;
 const conferenceReviewersModel = require('../models').conferenceReviewers;
+const conferenceAuthorsModel = require('../models').conferenceAuthor
 
 
 const createConference = async (req, res) => {
@@ -77,39 +78,57 @@ const createConference = async (req, res) => {
 
 
 const getAllConferences = async (req, res) => {
-    try {
-      const conferences = await conferenceModel.findAll();
-      const conferenceReviewers = await conferenceReviewersModel.findAll();
-      const reviewers = await userModel.findAll({
-        attributes: ['id', 'email'],
-        where: { role: 'reviewer' },
-      });
-  
-      const reviewersMap = reviewers.reduce((acc, user) => {
-        acc[user.id] = user;
-        return acc;
-      }, {});
-  
-      const conferencesWithReviewers = conferences.map((conference) => {
-        const reviewersForConference = conferenceReviewers
-          .filter((reviewer) => reviewer.conferenceId === conference.id)
-          .map((reviewer) => reviewersMap[reviewer.reviewerId]);
-  
-        return {
-          ...conference.toJSON(),
-          reviewers: reviewersForConference,
-        };
-      });
-  
-      res.status(200).send({
-        message: 'List of conferences with their reviewers',
-        data: conferencesWithReviewers,
-      });
-    } catch (error) {
-      console.error('Error fetching conferences with reviewers:', error);
-      res.status(500).send({ message: 'Error fetching conferences' });
-    }
-  };
+  try {
+    const conferences = await conferenceModel.findAll();
+    const conferenceReviewers = await conferenceReviewersModel.findAll();
+    const conferenceAuthors = await conferenceAuthorsModel.findAll();
+
+    const reviewers = await userModel.findAll({
+      attributes: ['id', 'email'],
+      where: { role: 'reviewer' },
+    });
+
+    const authors = await userModel.findAll({
+      attributes: ['id', 'email'],
+      where: { role: 'author' },
+    });
+
+    const reviewersMap = reviewers.reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    const authorsMap = authors.reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+
+    const conferencesWithDetails = conferences.map((conference) => {
+      const reviewersForConference = conferenceReviewers
+        .filter((reviewer) => reviewer.conferenceId === conference.id)
+        .map((reviewer) => reviewersMap[reviewer.reviewerId]);
+
+      const authorsForConference = conferenceAuthors
+        .filter((author) => author.conferenceId === conference.id)
+        .map((author) => authorsMap[author.authorId]);
+
+      return {
+        ...conference.toJSON(),
+        reviewers: reviewersForConference,
+        authors: authorsForConference,
+      };
+    });
+
+    res.status(200).send({
+      message: 'List of conferences with their reviewers and authors',
+      data: conferencesWithDetails,
+    });
+  } catch (error) {
+    console.error('Error fetching conferences with reviewers and authors:', error);
+    res.status(500).send({ message: 'Error fetching conferences' });
+  }
+};
+
   
 
 const getConferenceById = async(req, res) => {

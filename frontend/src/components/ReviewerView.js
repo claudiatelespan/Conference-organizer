@@ -1,22 +1,19 @@
 import React, { useState } from "react";
 import "../App.css";
+import { handleDownload, toTitleCase } from "../Utils.js";
+import { addReview } from "../Api.js";
+
 
 const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview }) => {
   const [tempFeedback, setTempFeedback] = useState({});
 
-  // Filter articles for this conference where this reviewer is assigned
-  const assignedArticles = articles.filter(article => 
-    article.conferenceId === selectedConference.id &&
-    article.reviews.some(review => review.reviewerId === reviewerId)
-  );
-
   const getReviewerFeedback = (article) => {
-    const review = article.reviews.find(r => r.reviewerId === reviewerId);
+    const review = article?.reviews?.find(r => r.reviewerId === reviewerId);
     return review ? review.feedback : '';
   };
 
   const isArticleApproved = (article) => {
-    return article.reviews.every(review => review.approved);
+    return article?.reviews?.every(review => review.approved);
   };
 
   const handleFeedbackChange = (articleId, feedback) => {
@@ -26,33 +23,43 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
     });
   };
 
-  const handleSendReview = (articleId) => {
+  const handleSendReview = async (articleId) => {
     const feedback = tempFeedback[articleId] || '';
-    onUpdateReview(articleId, reviewerId, { feedback });
-    // Clear temporary feedback after sending
-    setTempFeedback({
-      ...tempFeedback,
-      [articleId]: ''
-    });
+    try {
+      const result = await addReview(articleId, localStorage.getItem('userId'), { feedback, status: 'respins' });
+
+      onUpdateReview(selectedConference.id);
+      setTempFeedback({
+        ...tempFeedback,
+        [articleId]: ''
+      });
+
+    } catch (error) {
+      console.error('Eroare la trimiterea review-ului:', error);
+    }
   };
 
-  const handleApproveArticle = (articleId) => {
-    onUpdateReview(articleId, reviewerId, { approved: true });
-  };
+  const handleApproveArticle = async (articleId) => {
+    const feedback = 'OK!'
+    try {
+      const result = await addReview(articleId, localStorage.getItem('userId'), { feedback, status: 'acceptat' });
+      onUpdateReview(selectedConference.id);
+      setTempFeedback({
+        ...tempFeedback,
+        [articleId]: ''
+      });
 
-  const handleDownload = (fileUrl) => {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = fileUrl.split("/").pop();
-    link.click();
+    } catch (error) {
+      console.error('Eroare la trimiterea review-ului:', error);
+    }
   };
 
   return (
     <div className="reviewer-view">
       <h2>Articole de evaluat pentru: {selectedConference.title}</h2>
-      <div className="articles-grid">
-        {assignedArticles.map((article) => {
-          const reviewerReview = article.reviews.find(r => r.reviewerId === reviewerId);
+      <div className="articles-section">
+        {articles?.map((article) => {
+          const reviewerReview = article?.reviews?.find(r => r.reviewerId === reviewerId);
           const isReviewerApproved = reviewerReview?.approved;
           const isFullyApproved = isArticleApproved(article);
           const submittedFeedback = getReviewerFeedback(article);
@@ -64,29 +71,24 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
             >
               <h3>{article.title}</h3>
               <button
-                onClick={() => handleDownload(article.fileUrl)}
+                onClick={() => handleDownload(article.filePath)}
               >
                 Descarcă articol
               </button>
-              <p><strong>Autor:</strong> {article.author}</p>
+              <p><strong>Autor:</strong> {article.authorEmail}</p>
               <p>
                 <strong>Status:</strong>{' '}
-                <span className={`status ${isFullyApproved ? 'approved' : 'pending'}`}>
-                  {isFullyApproved ? 'Aprobat' : 'În așteptare'}
+                <span className={`status ${article.status ==='accepted' ? 'approved' : 'pending'}`}>
+                  {toTitleCase(article.status)}
                 </span>
               </p>
               
               <div className="review-section">
-                <h4>Review-ul tău:</h4>
-                
-                {/* Display submitted review if it exists */}
-                {submittedFeedback && (
-                  <div className="submitted-review">
-                    <p>{submittedFeedback}</p>
-                  </div>
-                )}
-
-                {/* Textarea for new review */}
+                <div><h4>Review-ul tău:</h4>
+                {article.reviews?.filter(review => review.reviewer_id === parseInt(localStorage.getItem('userId')))[0]?.feedback || ''}
+                </div>
+                <p></p>
+                <p></p>
                 <div className="new-review">
                   <h5>Adaugă/Modifică review:</h5>
                   <textarea
@@ -110,9 +112,7 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
                       </button>
                       <button 
                         onClick={() => handleApproveArticle(article.id)}
-                        className="approve-button"
-                        // disabled={!submittedFeedback}
-                      >
+                        className="approve-button"                      >
                         Aprobă
                       </button>
                     </>

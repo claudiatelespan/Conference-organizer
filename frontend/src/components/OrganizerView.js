@@ -1,18 +1,10 @@
 import React, { useState } from "react";
+import { handleDownload, toTitleCase } from "../Utils.js";
+import "../App.css";
 
 const OrganizerView = ({ conference, articles }) => {
 
-  const filteredArticles = articles.filter(
-    (article) => article.conferenceId === conference.id
-  );
-
-  // Funcție pentru a descărca fișierul unui articol
-  const handleDownload = (fileUrl) => {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = fileUrl.split("/").pop();
-    link.click();
-  };
+  const filteredArticles = articles;
 
   // Funcție pentru a reseta statusul unui articol (în cazul unui upload nou)
   // const handleResetStatus = (articleId) => {
@@ -28,24 +20,29 @@ const OrganizerView = ({ conference, articles }) => {
     <div>
       <h2>Detalii conferință: {conference.title}</h2>
       <div className="article-list">
-        {filteredArticles.length > 0 ? (
-          filteredArticles.map((article) => (
+        {filteredArticles?.length > 0 ? (
+          filteredArticles?.map((article) => (
             <div key={article.id} className="article-item">
               <h3>{article.title}</h3>
-              <button
-                onClick={() => handleDownload(article.fileUrl)}
+              <button className="download"
+                onClick={() => handleDownload(article.filePath)}
               >
                 Descarcă articol
               </button>
-              <p><strong>Autor:</strong> {article.author}</p>
-              <p><strong>Status:</strong> {article.status}</p>
+              <p><strong>Autor:</strong> {article.authorEmail}</p>
+              <p>
+                <strong>Status:</strong>{' '}
+                <span className={`status ${article.status ==='accepted' ? 'approved' : 'pending'}`}>
+                  {toTitleCase(article.status)}
+                </span>
+              </p>
               <p><strong>Review-uri:</strong></p>
               <ul>
-                {article.reviews.length > 0 ? (
-                  article.reviews.map((review, index) => (
+                {article?.reviews?.length > 0 ? (
+                  article?.reviews.map((review, index) => (
                     <li key={index}>
-                      <strong>{review.reviewerId}:</strong> {review.feedback} -{" "}
-                      {review.approved ? "Aprobat" : "În așteptare"}
+                      <strong>{review.reviewer.email}:</strong> {review.feedback} -{" "}
+                      {toTitleCase(review.status)}
                     </li>
                   ))
                 ) : (

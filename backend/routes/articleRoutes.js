@@ -8,8 +8,8 @@ const { getArticleDetails, reviewArticle, updateArticle, downloadFile} = require
 
 router.post('/upload', upload.single('file'), uploadArticle);
 router.get('/getAllArticlesPerConference/:conferenceId',verifyToken, getArticlesByConference);
-router.post('/review/:articleId', reviewArticle);
-router.put('/:articleId', upload.single('file'), updateArticle);
+router.post('/review/:articleId',verifyToken, reviewArticle);
+router.put('/:articleId',verifyToken, upload.single('file'), updateArticle);
 router.get('/download/:articleId', downloadFile);
 router.get('/articleDetails/:articleId', getArticleDetails);
 

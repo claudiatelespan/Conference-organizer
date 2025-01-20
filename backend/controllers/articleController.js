@@ -6,49 +6,6 @@ const userModel = require('../models/index').user;
 const path = require('path'); 
 const fs = require('fs'); 
 
-// const uploadArticle = async (req, res) => {
-//   try {
-
-//     const { conferenceId, userId } = req.body;  
-//     const { file } = req; 
-    
-//    // const { conferenceId } = req.body; 
-//     //const userId = req.user.id; 
-//     //const { file } = req; 
-
-    
-//     const isRegistered = await ConferenceAuthorModel.findOne({
-//       where: { conferenceId, authorId: userId },
-//     });
-
-//     if (!isRegistered) {
-//       return res.status(403).send({ message: 'Nu ești înscris la această conferință' });
-//     }
-
-  
-//     if (!file) {
-//       return res.status(400).send({ message: 'Fișierul lipsă. Te rugăm să încarci un document.' });
-//     }
-
-   
-//     const newArticle = await ArticleModel.create({
-//       title: req.body.title || `Articol - ${Date.now()}`, 
-//       conferenceId: conferenceId,
-//       authorId: userId,
-//       status: 'submitted',
-//       filePath: file.path, 
-//     });
-
-//     return res.status(201).send({
-//       message: 'Articol încărcat cu succes!',
-//       article: newArticle,
-//     });
-//   } catch (error) {
-//     console.error('Eroare la încărcarea articolului:', error);
-//     return res.status(500).send({ message: 'Eroare internă de server.' });
-//   }
-// };
-
 const uploadArticle = async (req, res) => {
   try {
     const { conferenceId, userId } = req.body;  
@@ -73,7 +30,7 @@ const uploadArticle = async (req, res) => {
       conferenceId: conferenceId,
       authorId: userId,
       status: 'submitted',
-      filePath: file.path, 
+      filePath: file.filename, 
     });
 
   
@@ -106,7 +63,6 @@ const uploadArticle = async (req, res) => {
 
 const getArticlesByConference = async (req, res) => {
   try {
-  
     const { conferenceId } = req.params;
 
     const conference = await ConferenceModel.findByPk(conferenceId);
@@ -118,9 +74,50 @@ const getArticlesByConference = async (req, res) => {
       where: { conferenceId },
     });
 
+    const articleReviews = await ArticleReviewModel.findAll({
+      where: {
+        article_id: articles.map(article => article.id),
+      },
+    });
+
+    const reviewers = await userModel.findAll({
+      attributes: ['id', 'email'],
+      where: { role: 'reviewer' },
+    });
+
+    const reviewersMap = reviewers.reduce((acc, reviewer) => {
+      acc[reviewer.id] = reviewer;
+      return acc;
+    }, {});
+
+    const authors = await userModel.findAll({
+      attributes: ['id', 'email'],
+      where: { role: 'author' },
+    });
+
+    const authorsMap = authors.reduce((acc, author) => {
+      acc[author.id] = author.email;
+      return acc;
+    }, {});
+
+    const articlesWithDetails = articles.map((article) => {
+      const reviewsForArticle = articleReviews
+        .filter((review) => review.article_id === article.id)
+        .map((review) => ({
+          ...review.toJSON(),
+          reviewer: reviewersMap[review.reviewer_id],
+        }));
+
+      return {
+        ...article.toJSON(),
+        reviews: reviewsForArticle,
+        authorEmail: authorsMap[article.authorId],
+      };
+    });
+
     res.status(200).send({
       message: `Articole pentru conferința ${conference.title}`,
-      articles,
+      articles: articlesWithDetails,
     });
   } catch (error) {
     console.error('Eroare la preluarea articolelor:', error);
@@ -128,12 +125,11 @@ const getArticlesByConference = async (req, res) => {
   }
 };
 
-
 const reviewArticle = async (req, res) => {
   try {
     const { articleId } = req.params; 
     const { reviewerId, status, feedback } = req.body; 
-
+    console.log(req.body)
    
     const article = await ArticleModel.findByPk(articleId);
     if (!article) {
@@ -204,11 +200,11 @@ const updateArticle = async (req, res) => {
 
    
     if (article.filePath) {
-      fs.unlinkSync(article.filePath);
+      fs.unlinkSync(path.join(__dirname, '..', 'uploads', article.filePath));
     }
 
     
-    article.filePath = file.path;
+    article.filePath = file.filename;
     article.status = 'submitted'; 
     await article.save();
 
