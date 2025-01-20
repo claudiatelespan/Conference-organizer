@@ -25,27 +25,20 @@ const App = () => {
   useEffect(() => {
     const loadConferences = async () => {
       try {
-        // Obține userId din localStorage
         const userId = parseInt(localStorage.getItem("userId"), 10);
-  
-        // Fetch pentru toate conferințele
         const data = await fetchConferences();
-  
-        // Filtrăm conferințele la care utilizatorul este autor
         const userRegisteredConferences = data.filter(conference =>
           conference.authors?.some(author => author.id === userId)
         );
   
-        // Actualizăm stările
-        setConferences(data); // Lista completă de conferințe
-        setRegisteredConferences(userRegisteredConferences.map(conf => conf.id)); // ID-urile conferințelor înregistrate
+        setConferences(data); 
+        setRegisteredConferences(userRegisteredConferences.map(conf => conf.id));
       } catch (error) {
         console.error("Error loading conferences:", error);
         setError("Failed to load conferences. Please try again later.");
       }
     };
   
-    // Se apelează doar dacă utilizatorul este autentificat
     if (isAuthenticated) {
       loadConferences();
     }
@@ -94,7 +87,7 @@ const App = () => {
     }
   };
 
-  const handleArticleUpload = (conferenceId, articleData, existingArticleId = null) => {
+  const handleArticleUpload = async (conferenceId, articleData, existingArticleId = null) => {
     if (existingArticleId) {
       setArticles(prevArticles => 
         prevArticles.map(article => {
@@ -109,23 +102,12 @@ const App = () => {
         })
       );
     } else {
-      const conference = conferences.find(c => c.id === conferenceId);
-      const selectedReviewers = conference.reviewers;
-
-      const newArticle = {
-        id: articles.length + 1,
-        conferenceId,
-        authorId,
-        ...articleData,
-        status: "pending",
-        reviews: selectedReviewers.map(reviewer => ({
-          reviewerId: reviewer.id,
-          feedback: "",
-          approved: false
-        }))
-      };
-
-      setArticles(prev => [...prev, newArticle]);
+      try {
+        const articlesData = await fetchArticlesByConference(conferenceId); // Asigură-te că această funcție adresează corect backend-ul
+        setArticles(articlesData); // Actualizează starea cu articolele actualizate din backend
+      } catch (error) {
+        console.error("Eroare la reîncărcarea articolelor:", error);
+      }
     }
   };
 

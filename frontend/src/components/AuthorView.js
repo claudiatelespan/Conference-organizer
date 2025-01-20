@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { handleDownload } from "../Utils.js";
-
+import { uploadArticle } from "../Api.js";
 
 const AuthorView = ({ 
   selectedConference, 
@@ -9,23 +9,23 @@ const AuthorView = ({
   onRegister, 
   onUploadArticle 
 }) => {
-  const handleFileUpload = (event, existingArticleId = null) => {
+
+  const handleFileUpload = async (event, existingArticleId = null) => {
     const file = event.target.files[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const articleData = {
-        title: file.name,
-        content: e.target.result,
-        uploadDate: new Date().toISOString(),
-      };
-
-      onUploadArticle(selectedConference.id, articleData, existingArticleId);
+  
+    const articleData = {
+      title: file.name,
     };
-    reader.readAsText(file);
+  
+    try {
+      const newArticle = await uploadArticle(selectedConference.id, articleData, file);
+      console.log("Articol încărcat cu succes:", newArticle);
+      onUploadArticle(selectedConference.id, articleData, existingArticleId);
+    } catch (error) {
+      console.error("Eroare la încărcarea articolului:", error);
+    }
   };
-
 
   if (!selectedConference) return <p>Selectează o conferință pentru a vedea detalii.</p>;
 

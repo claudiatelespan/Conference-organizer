@@ -30,7 +30,7 @@ const uploadArticle = async (req, res) => {
       conferenceId: conferenceId,
       authorId: userId,
       status: 'submitted',
-      filePath: file.path, 
+      filePath: file.filename, 
     });
 
   

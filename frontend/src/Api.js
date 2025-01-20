@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://localhost:1234/api";
 
-// Funcție pentru a prelua toate conferințele
+// preia toate conferințele
 
 export const fetchConferences = async () => {
     try {
@@ -79,7 +79,7 @@ export const registerUser = async (credentials) => {
   };
   
   //reviewers
-  export const fetchReviewers = async () => {
+export const fetchReviewers = async () => {
     try {
       const token = localStorage.getItem("authToken");
   
@@ -201,3 +201,34 @@ export const registerAuthorToConference = async (authorId, conferenceId) => {
 };
 
 
+//upload articole
+
+export const uploadArticle = async (conferenceId, articleData, file) => {
+  try {
+    const formData = new FormData();
+    formData.append("conferenceId", conferenceId);
+    formData.append("userId", localStorage.getItem("userId"));
+    formData.append("title", articleData.title);
+    formData.append("file", file);
+    console.log(file);
+
+    const response = await fetch(`${API_BASE_URL}/articles/upload`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload article.");
+    }
+
+    const result = await response.json();
+
+    return result.article;
+  } catch (error) {
+    console.error("Error uploading article:", error);
+    throw error;
+  }
+};
