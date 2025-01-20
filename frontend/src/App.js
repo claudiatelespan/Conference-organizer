@@ -12,7 +12,6 @@ const App = () => {
   const userRole = "author";
   const reviewerId = 1;
   const authorId = 1;
-
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -30,8 +29,12 @@ const App = () => {
         const userRegisteredConferences = data.filter(conference =>
           conference.authors?.some(author => author.id === userId)
         );
-  
-        setConferences(data); 
+        if (currentUser.role === "reviewer"){
+          setConferences(data.filter(c => 
+            c.reviewers.some(reviewer => reviewer.id === userId)));
+          }
+        else
+          setConferences(data); 
         setRegisteredConferences(userRegisteredConferences.map(conf => conf.id));
       } catch (error) {
         console.error("Error loading conferences:", error);
@@ -59,20 +62,9 @@ const App = () => {
     }
   };
 
-  const handleUpdateReview = (articleId, reviewerId, updates) => {
-    setArticles(prevArticles => 
-      prevArticles.map(article => {
-        if (article.id === articleId) {
-          const updatedReviews = article.reviews.map(review => 
-            review.reviewerId === reviewerId 
-              ? { ...review, ...updates }
-              : review
-          );
-          return { ...article, reviews: updatedReviews };
-        }
-        return article;
-      })
-    );
+  const handleUpdateReview = async (conferenceId) => {
+    const articlesData = await fetchArticlesByConference(conferenceId);
+    setArticles(articlesData);
   };
 
   const handleRegisterToConference = async (conferenceId) => {

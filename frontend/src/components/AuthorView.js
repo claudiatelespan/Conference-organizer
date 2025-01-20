@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { handleDownload } from "../Utils.js";
+import { handleDownload, toTitleCase } from "../Utils.js";
 import { uploadArticle } from "../Api.js";
+import '../App.css'
 
 const AuthorView = ({ 
   selectedConference, 
@@ -70,7 +71,11 @@ const AuthorView = ({
                     <div key={idx} className="review">
                       <p><strong>Reviewer {idx + 1}:</strong></p>
                       <p>{review.feedback || 'Niciun feedback încă'}</p>
-                      <p>Status: {review.approved ? 'Aprobat' : 'În așteptare'}</p>
+                      <p>
+                         Status: <span className={review.status === 'respins' ? 'rejected' : review.status === 'acceptat' ? 'approved' : ''}>
+                         {toTitleCase(review.status)}
+                          </span>
+                      </p>
                     </div>
                   ))}
                 </div>

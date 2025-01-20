@@ -201,7 +201,7 @@ export const registerAuthorToConference = async (authorId, conferenceId) => {
 };
 
 
-//upload articole
+//upload articole sau update
 
 export const uploadArticle = async (conferenceId, articleData, file, existingArticleId = null) => {
   try {
@@ -231,6 +231,37 @@ export const uploadArticle = async (conferenceId, articleData, file, existingArt
     return result.article;
   } catch (error) {
     console.error("Error uploading article:", error);
+    throw error;
+  }
+};
+
+// add review
+
+export const addReview = async (articleId, reviewerId, reviewData) => {
+  try {
+    console.log(reviewerId)
+    const response = await fetch(`${API_BASE_URL}/articles/review/${articleId}`, {
+      method: 'POST',
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        reviewerId: reviewerId,
+        status: reviewData.status,
+        feedback: reviewData.feedback,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Eroare la trimiterea review-ului');
+    }
+
+    const result = await response.json();
+    alert(`Review-ul tau a fost inregistrat cu succes.`);
+    return result;
+  } catch (error) {
+    console.error('Eroare la trimiterea review-ului:', error);
     throw error;
   }
 };

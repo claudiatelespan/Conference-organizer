@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { handleDownload } from "../Utils.js";
+import { handleDownload, toTitleCase } from "../Utils.js";
+import "../App.css";
 
 const OrganizerView = ({ conference, articles }) => {
 
@@ -36,7 +37,7 @@ const OrganizerView = ({ conference, articles }) => {
                   article?.reviews.map((review, index) => (
                     <li key={index}>
                       <strong>{review.reviewerId}:</strong> {review.feedback} -{" "}
-                      {review.approved ? "Aprobat" : "În așteptare"}
+                      {toTitleCase(review.status)}
                     </li>
                   ))
                 ) : (
