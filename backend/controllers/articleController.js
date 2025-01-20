@@ -161,11 +161,11 @@ const updateArticle = async (req, res) => {
 
    
     if (article.filePath) {
-      fs.unlinkSync(article.filePath);
+      fs.unlinkSync(path.join(__dirname, '..', 'uploads', article.filePath));
     }
 
     
-    article.filePath = file.path;
+    article.filePath = file.filename;
     article.status = 'submitted'; 
     await article.save();
 

@@ -19,9 +19,9 @@ const AuthorView = ({
     };
   
     try {
-      const newArticle = await uploadArticle(selectedConference.id, articleData, file);
-      console.log("Articol încărcat cu succes:", newArticle);
-      onUploadArticle(selectedConference.id, articleData, existingArticleId);
+      const updatedArticle = await uploadArticle(selectedConference.id, articleData, file, existingArticleId);
+      console.log("Articol actualizat cu succes:", updatedArticle);
+      onUploadArticle(selectedConference.id, articleData, existingArticleId); 
     } catch (error) {
       console.error("Eroare la încărcarea articolului:", error);
     }

@@ -87,27 +87,12 @@ const App = () => {
     }
   };
 
-  const handleArticleUpload = async (conferenceId, articleData, existingArticleId = null) => {
-    if (existingArticleId) {
-      setArticles(prevArticles => 
-        prevArticles.map(article => {
-          if (article.id === existingArticleId) {
-            return {
-              ...article,
-              ...articleData,
-              reviews: article.reviews 
-            };
-          }
-          return article;
-        })
-      );
-    } else {
-      try {
-        const articlesData = await fetchArticlesByConference(conferenceId); // Asigură-te că această funcție adresează corect backend-ul
-        setArticles(articlesData); // Actualizează starea cu articolele actualizate din backend
-      } catch (error) {
-        console.error("Eroare la reîncărcarea articolelor:", error);
-      }
+  const handleArticleUpload = async (conferenceId) => {
+    try {
+        const articlesData = await fetchArticlesByConference(conferenceId); 
+        setArticles(articlesData);
+    } catch (error) {
+      console.error("Eroare la încărcarea/articularea articolului:", error);
     }
   };
 

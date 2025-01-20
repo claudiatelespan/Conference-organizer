@@ -203,17 +203,19 @@ export const registerAuthorToConference = async (authorId, conferenceId) => {
 
 //upload articole
 
-export const uploadArticle = async (conferenceId, articleData, file) => {
+export const uploadArticle = async (conferenceId, articleData, file, existingArticleId = null) => {
   try {
     const formData = new FormData();
     formData.append("conferenceId", conferenceId);
     formData.append("userId", localStorage.getItem("userId"));
     formData.append("title", articleData.title);
     formData.append("file", file);
-    console.log(file);
+    if (existingArticleId) {
+      formData.append('articleId', existingArticleId);
+    }
 
-    const response = await fetch(`${API_BASE_URL}/articles/upload`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE_URL}/articles/${existingArticleId || 'upload'}`, {
+      method: existingArticleId ? 'PUT' : 'POST',
       headers: {
         "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
       },
