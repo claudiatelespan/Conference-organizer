@@ -1,5 +1,6 @@
 import React, { useState , useEffect} from "react";
-import { fetchReviewers, createConference } from "../Api.js"
+import { fetchReviewers, createConference } from "../Api.js";
+import { formatDateToDayOnly } from "../Utils.js";
 import "../App.css";
 
 const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,reviewerId,
@@ -114,7 +115,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
         return (
           <button 
             onClick={() => onRegister(conf.id)} 
-            className="register-button"
+            className="register-button upload-button"
           >
             Înscrie-te
           </button>
@@ -132,10 +133,11 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             style={{ cursor: 'pointer' }}
           >
             <strong>{conf.title}</strong>
-            <p>{conf.date}</p>
+            <p>{conf.description}</p>
+            <p><strong>{formatDateToDayOnly(conf.date)}</strong></p>
             <p>
-              <strong>Revieweri:</strong>{" "}
-              {conf?.reviewers?.map((rev) => rev.email).join("\n")}
+              <strong>Revieweri: </strong>
+              <div dangerouslySetInnerHTML={{ __html: conf?.reviewers?.map((rev) => rev.email).join("<br/>") }} />
             </p>
           </div>
         ));
@@ -154,7 +156,8 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
             style={{ cursor: 'pointer' }}
           >
             <strong>{conf.title}</strong>
-            <p>{conf.date}</p>
+            <p>{conf.description}</p>
+            <p><strong>{formatDateToDayOnly(conf.date)}</strong></p>
           </div>
         ));
       }
@@ -168,11 +171,11 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
           <div key={conf.id} className="conference-item">
             <strong>{conf.title}</strong>
             <p>{conf.description}</p>
-            <p>{conf.date}</p>
+            <p><strong>{formatDateToDayOnly(conf.date)}</strong></p>
             {registeredConferences.includes(conf.id) ? (
               <button 
                 onClick={() => onSelectConference(conf.id)}
-                className="select-button"
+                className="select-button download"
               >
                 Vizualizează
               </button>

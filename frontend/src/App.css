@@ -14,6 +14,8 @@
   padding: 20px;
   background-color: var(--secondary-color);
   border-right: 1px solid var(--border-color);
+  height: 100%;
+  min-height: 100vh;
 }
 
 .sidebar h1 {
@@ -366,6 +368,11 @@ textarea {
 .approve-button {
   background-color: #28a745;
   color: white;
+}
+
+.register-button {
+  border: none;
+  margin: 0 !important;
 }
 
 .approve-button:hover {

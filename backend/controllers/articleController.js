@@ -74,50 +74,56 @@ const getArticlesByConference = async (req, res) => {
       where: { conferenceId },
     });
 
-    // Preluăm review-urile pentru articole
     const articleReviews = await ArticleReviewModel.findAll({
       where: {
-        article_id: articles.map(article => article.id), // Găsim articolele din conferință
+        article_id: articles.map(article => article.id),
       },
     });
 
-    // Preluăm reviewerii pentru fiecare review
     const reviewers = await userModel.findAll({
       attributes: ['id', 'email'],
       where: { role: 'reviewer' },
     });
 
-    // Creăm o mapare a reviewerilor pentru articole
     const reviewersMap = reviewers.reduce((acc, reviewer) => {
       acc[reviewer.id] = reviewer;
       return acc;
     }, {});
 
-    const articlesWithReviews = articles.map((article) => {
-      // Găsim review-urile pentru fiecare articol
+    const authors = await userModel.findAll({
+      attributes: ['id', 'email'],
+      where: { role: 'author' },
+    });
+
+    const authorsMap = authors.reduce((acc, author) => {
+      acc[author.id] = author.email;
+      return acc;
+    }, {});
+
+    const articlesWithDetails = articles.map((article) => {
       const reviewsForArticle = articleReviews
         .filter((review) => review.article_id === article.id)
         .map((review) => ({
           ...review.toJSON(),
-          reviewer: reviewersMap[review.reviewer_id], // Atașăm reviewer-ul la fiecare review
+          reviewer: reviewersMap[review.reviewer_id],
         }));
 
       return {
         ...article.toJSON(),
-        reviews: reviewsForArticle, // Adăugăm review-urile la articol
+        reviews: reviewsForArticle,
+        authorEmail: authorsMap[article.authorId],
       };
     });
 
     res.status(200).send({
       message: `Articole pentru conferința ${conference.title}`,
-      articles: articlesWithReviews, // Trimitem articolele cu review-urile
+      articles: articlesWithDetails,
     });
   } catch (error) {
     console.error('Eroare la preluarea articolelor:', error);
     res.status(500).send({ message: 'Eroare internă de server.' });
   }
 };
-
 
 const reviewArticle = async (req, res) => {
   try {

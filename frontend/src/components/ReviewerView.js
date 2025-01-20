@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../App.css";
-import { handleDownload } from "../Utils.js";
+import { handleDownload, toTitleCase } from "../Utils.js";
 import { addReview } from "../Api.js";
 
 
@@ -57,7 +57,7 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
   return (
     <div className="reviewer-view">
       <h2>Articole de evaluat pentru: {selectedConference.title}</h2>
-      <div className="articles-grid">
+      <div className="articles-section">
         {articles?.map((article) => {
           const reviewerReview = article?.reviews?.find(r => r.reviewerId === reviewerId);
           const isReviewerApproved = reviewerReview?.approved;
@@ -75,11 +75,11 @@ const ReviewerView = ({ selectedConference, articles, reviewerId, onUpdateReview
               >
                 Descarcă articol
               </button>
-              <p><strong>Autor:</strong> {article.author}</p>
+              <p><strong>Autor:</strong> {article.authorEmail}</p>
               <p>
                 <strong>Status:</strong>{' '}
-                <span className={`status ${isFullyApproved ? 'approved' : 'pending'}`}>
-                  {isFullyApproved ? 'Aprobat' : 'În așteptare'}
+                <span className={`status ${article.status ==='accepted' ? 'approved' : 'pending'}`}>
+                  {toTitleCase(article.status)}
                 </span>
               </p>
               

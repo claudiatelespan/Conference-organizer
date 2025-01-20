@@ -13,3 +13,12 @@ export function toTitleCase(str) {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
+
+export function formatDateToDayOnly(dateString) {
+  const date = new Date(dateString); // Convertim stringul într-un obiect Date
+  const day = date.getUTCDate().toString().padStart(2, '0'); // Ziua cu două cifre
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Luna cu două cifre
+  const year = date.getUTCFullYear(); // Anul
+  
+  return `${year}-${month}-${day}`; // Formatul final: YYYY-MM-DD
+}

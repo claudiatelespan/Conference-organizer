@@ -29,7 +29,7 @@ const OrganizerView = ({ conference, articles }) => {
               >
                 Descarcă articol
               </button>
-              <p><strong>Autor:</strong> {article.author}</p>
+              <p><strong>Autor:</strong> {article.authorEmail}</p>
               <p>
                 <strong>Status:</strong>{' '}
                 <span className={`status ${article.status ==='accepted' ? 'approved' : 'pending'}`}>

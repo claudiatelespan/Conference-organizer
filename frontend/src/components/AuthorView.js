@@ -11,7 +11,6 @@ const AuthorView = ({
   onUploadArticle 
 }) => {
   
-
   const handleFileUpload = async (event, existingArticleId = null) => {
     const file = event.target.files[0];
     if (!file) return;
