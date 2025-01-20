@@ -279,6 +279,7 @@ const Sidebar = ({ conferences, onAddConference, onSelectConference, userRole,re
                         <button
                           type="button"
                           onClick={() => handleRemoveReviewer(rev.id)}
+                          className="delete-reviewer-button"
                         >
                           Șterge
                         </button>

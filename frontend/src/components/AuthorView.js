@@ -10,6 +10,7 @@ const AuthorView = ({
   onRegister, 
   onUploadArticle 
 }) => {
+  
 
   const handleFileUpload = async (event, existingArticleId = null) => {
     const file = event.target.files[0];
@@ -33,12 +34,6 @@ const AuthorView = ({
   return (
     <div className="author-view">
       <h2>Conferință: {selectedConference.title}</h2>
-      
-      {!isRegistered ? (
-        <button onClick={onRegister} className="register-button">
-          Înscrie-te la conferință
-        </button>
-      ) : (
         <div className="articles-section">
           <div className="upload-section">
             <input
@@ -63,14 +58,21 @@ const AuthorView = ({
                   >
                     Descarcă articol
                 </button>
-                <p className="status">Status: {article.status}</p>
-                
+                <label htmlFor={`update-${article.id}`} className="upload-button">
+                    Încarcă versiune nouă
+                </label>
+                <p>
+                  <strong>Status:</strong>{' '}
+                  <span className={`status ${article.status ==='accepted' ? 'approved' : 'pending'}`}>
+                    {toTitleCase(article.status)}
+                  </span>
+                </p>                
                 <div className="reviews-section">
                   <h4>Review-uri:</h4>
                   {article.reviews?.map((review, idx) => (
                     <div key={idx} className="review">
                       <p><strong>Reviewer {idx + 1}:</strong></p>
-                      <p>{review.feedback || 'Niciun feedback încă'}</p>
+                      <p className="reviews-feedback">{review.feedback || 'Niciun feedback încă'}</p>
                       <p>
                          Status: <span className={review.status === 'respins' ? 'rejected' : review.status === 'acceptat' ? 'approved' : ''}>
                          {toTitleCase(review.status)}
@@ -88,15 +90,11 @@ const AuthorView = ({
                     accept=".pdf,.doc,.docx"
                     style={{ display: 'none' }}
                   />
-                  <label htmlFor={`update-${article.id}`} className="upload-button">
-                    Încarcă versiune nouă
-                  </label>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
     </div>
   );
 };

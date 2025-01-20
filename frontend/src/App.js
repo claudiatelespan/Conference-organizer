@@ -9,9 +9,6 @@ import { fetchConferences, loginUser, fetchArticlesByConference, registerAuthorT
 
 
 const App = () => {
-  const userRole = "author";
-  const reviewerId = 1;
-  const authorId = 1;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
